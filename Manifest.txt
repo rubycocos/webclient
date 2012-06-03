@@ -5,3 +5,4 @@ Rakefile
 bin/fetch
 lib/fetcher.rb
 lib/fetcher/runner.rb
+lib/fetcher/worker.rb

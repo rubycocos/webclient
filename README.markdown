@@ -10,7 +10,15 @@ TBD
 
     require 'fetcher'
     
-    Fetcher.new.copy( '/tmp/hoe.html', 'http://geraldb.github.com/rubybook/hoe.html' )
+    Fetcher.copy( 'http://geraldb.github.com/rubybook/hoe.html', '/tmp/hoe.html' )
+
+or
+
+    logger = Logger.new( STDOUT )
+    worker = Fetcher::Worker.new( logger )
+    worker.copy( 'http://geraldb.github.com/rubybook/hoe.html', '/tmp/hoe.html' )
+
+
 
 ## Install
 

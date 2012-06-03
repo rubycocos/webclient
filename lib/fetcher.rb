@@ -11,16 +11,23 @@ require 'pp'
 require 'logger'
 require 'optparse'
 require 'fileutils'
+require 'uri'
+require 'net/http'
+require 'net/https'
+require 'ostruct'
+require 'date'
+require 'cgi'
 
 
 # our own code
 
 require 'fetcher/runner'
+require 'fetcher/worker'
 
 
 module Fetcher
 
-  VERSION = '0.0.1'
+  VERSION = '0.1.0'
 
   # version string for generator meta tag (includes ruby version)
   def self.banner
