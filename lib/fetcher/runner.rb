@@ -1,11 +1,6 @@
 
 module Fetcher
 
-   def self.copy( src, dest )
-      Worker.new( Logger.new(STDOUT) ).copy( src, dest )
-   end
-
-
   class Opts
   
     def initialize
@@ -24,13 +19,12 @@ module Fetcher
 
 
   class Runner
+
+    include LogUtils::Logging
     
-    attr_reader :logger
     attr_reader :opts
     
     def initialize
-      @logger       = Logger.new(STDOUT)
-      @logger.level = Logger::INFO
       @opts         = Opts.new
     end
     
@@ -43,22 +37,23 @@ module Fetcher
 
         # todo: find different letter for debug trace switch (use v for version?)
         cmd.on( "-v", "--verbose", "Show debug trace" )  do
-           logger.datetime_format = "%H:%H:%S"
-           logger.level = Logger::DEBUG
+           # todo/fix: use/change to logutils settings for level
+           # logger.datetime_format = "%H:%H:%S"
+           # logger.level = Logger::DEBUG
         end
 
       usage =<<EOS
  
-fetch - Lets you fetch text documents or binary blobs via HTTP, HTTPS.
+fetch #{VERSION} - Lets you fetch text documents or binary blobs via HTTP, HTTPS.
 
 #{cmd.help}
 
 Examples:
-  fetch http://geraldb.github.com/rubybook/hoe.html
-  fetch -o downloads http://geraldb.github.com/rubybook/hoe.html
+  fetch https://raw.github.com/openfootball/at-austria/master/2013_14/bl.txt
+  fetch -o downloads https://raw.github.com/openfootball/at-austria/master/2013_14/bl.txt
 
 Further information:
-  http://geraldb.github.com/fetcher
+  https://github.com/geraldb/fetcher
 
 EOS
  
@@ -87,15 +82,14 @@ EOS
         
         ## todo: use output path option
         
-        Worker.new( logger ).copy( src, dest )
+        Worker.new.copy( src, dest )
 
       end # each arg
 
-      puts "Done."
+      puts 'Done.'
       
     end   # method run
     
   end # class Runner
 
 end  # module Fetcher
-

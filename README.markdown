@@ -1,22 +1,35 @@
 # fetcher - Fetch Text Documents or Binary Blobs via HTTP, HTTPS
 
-* [geraldb.github.com/fetcher](http://geraldb.github.com/fetcher)
+* home  :: [github.com/geraldb/fetcher](https://github.com/geraldb/fetcher)
+* bugs  :: [github.com/geraldb/fetcher/issues](https://github.com/geraldb/fetcher/issues)
+* gem   :: [rubygems.org/gems/fetcher](https://rubygems.org/gems/fetcher)
+* rdoc  :: [rubydoc.info/gems/fetcher](http://rubydoc.info/gems/fetcher)
+* forum :: [groups.google.com/group/webslideshow](https://groups.google.com/group/webslideshow)
+
 
 ## Description
 
-TBD
 
 ## Usage
 
-    require 'fetcher'
-    
-    Fetcher.copy( 'http://geraldb.github.com/rubybook/hoe.html', '/tmp/hoe.html' )
+### Copy (to File)
+
+    Fetcher.copy( 'https://raw.github.com/openfootball/at-austria/master/2013_14/bl.txt', '/tmp/bl.txt' )
 
 or
 
-    logger = Logger.new( STDOUT )
-    worker = Fetcher::Worker.new( logger )
-    worker.copy( 'http://geraldb.github.com/rubybook/hoe.html', '/tmp/hoe.html' )
+    worker = Fetcher::Worker.new
+    worker.copy( 'https://raw.github.com/openfootball/at-austria/master/2013_14/bl.txt', '/tmp/bl.txt' )
+
+
+### Read (into String)
+
+    txt = Fetcher.read( 'https://raw.github.com/openfootball/at-austria/master/2013_14/bl.txt' )
+
+or
+
+    worker = Fetcher::Worker.new
+    txt = worker.read( 'https://raw.github.com/openfootball/at-austria/master/2013_14/bl.txt' )
 
 
 
@@ -29,10 +42,15 @@ Just install the gem:
 
 ## Real World Usage
 
-The [`slideshow`](http://slideshow.rubyforge.org) (also known as Slide Show (S9)) gem
+The [`slideshow`](http://slideshow-s9.github.io) (also known as Slide Show (S9)) gem
 that lets you create slide shows
 and author slides in plain text using a wiki-style markup language that's easy-to-write and easy-to-read
 ships with the `fetcher` gem.
+
+The [`sportdb`](https://github.com/geraldb/sport.db.ruby) gem that lets you read football (soccer) fixtures
+and more in plain text
+ships with the `fetcher` gem.
+
 
 
 ## License

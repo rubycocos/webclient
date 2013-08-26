@@ -2,18 +2,57 @@ module Fetcher
 
   class Worker
 
-    attr_reader :logger
+    include LogUtils::Logging
 
-    def initialize( logger )
-      @logger = logger
+### todo/fix:
+# remove logger from c'tor
+#  use logutils instead
+
+    def initialize( old_logger_do_not_use=nil )
+      if old_logger_do_not_use != nil
+         puts "*** depreciated API call [Fetcher.initialize] - do NOT pass in logger; no longer required/needed; logger arg will get removed"
+      end
+    end
+
+
+    def read( src )
+      # return contents (response body) a string
+      logger.debug "fetch - copy src: #{src} into string"
+      
+      response = get_response( src )
+      
+      # on error return empty string  - check: better return nil- why? why not??
+      return ''  if response.nil?
+
+      response.body.dup  # return string copy
+    end
+
+
+    def copy( src, dest )
+      logger.debug "fetch - copy src: #{src} to dest: #{dest}"
+
+      response = get_response( src )
+      
+      # on error return; do NOT copy file; sorry
+      return  if response.nil?
+
+      # check for content type; use 'wb' for images
+      if response.content_type =~ /image/
+        logger.debug '  switching to binary'
+        flags = 'wb'
+      else
+        flags = 'w'
+      end
+  
+      File.open( dest, flags ) do |f|
+        f.write( response.body )
+      end
     end
 
 
 ## todo: add file protocol 
 
-    def copy( src, dest )
-      logger.debug "fetch( src: #{src}, dest: #{dest} )"
-
+    def get_response( src )
       uri = URI.parse( src )
   
       # new code: honor proxy env variable HTTP_PROXY
@@ -72,23 +111,13 @@ module Fetcher
         else
           msg = "#{response.code} #{response.message}" 
           puts "*** error: #{msg}"
-          return   # todo: throw StandardException?  
+          return nil  # todo: throw StandardException?  
         end
       end
 
       logger.debug "  content_type: #{response.content_type}, content_length: #{response.content_length}"
-  
-      # check for content type; use 'wb' for images
-      if response.content_type =~ /image/
-        logger.debug '  switching to binary'
-        flags = 'wb'
-      else
-        flags = 'w'
-      end
-  
-      File.open( dest, flags ) do |f|
-        f.write( response.body )
-      end
+
+      response # return respone or nil if error
     end # method copy
 
   end # class Worker

@@ -19,6 +19,10 @@ require 'date'
 require 'cgi'
 
 
+# 3rd party gems
+
+require 'logutils'
+
 # our own code
 
 require 'fetcher/runner'
@@ -27,7 +31,7 @@ require 'fetcher/worker'
 
 module Fetcher
 
-  VERSION = '0.1.0'
+  VERSION = '0.2.0'
 
   # version string for generator meta tag (includes ruby version)
   def self.banner
@@ -45,6 +49,16 @@ module Fetcher
     args += ARGV.dup
     
     Runner.new.run(args)
+  end
+
+  # convenience shortcuts
+  
+  def self.copy( src, dest )
+    Worker.new.copy( src, dest )
+  end
+
+  def self.read( src )
+    Worker.new.read( src )
   end
 
 end  # module Fetcher
