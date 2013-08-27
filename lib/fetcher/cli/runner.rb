@@ -7,7 +7,7 @@ require 'optparse'
 
 # our own code (for command line interface/cli)
 
-require 'fetcher/opts'
+require 'fetcher/cli/opts'
 
 
 module Fetcher

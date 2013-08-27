@@ -40,7 +40,7 @@ module Fetcher
 
     ## NB: only load (require) cli code if called
 
-    require 'fetcher/runner'
+    require 'fetcher/cli/runner'
     
     # allow env variable to set RUBYOPT-style default command line options
     #   e.g. -o site 
