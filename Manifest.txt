@@ -4,5 +4,7 @@ README.markdown
 Rakefile
 bin/fetch
 lib/fetcher.rb
-lib/fetcher/runner.rb
+lib/fetcher/cli/opts.rb
+lib/fetcher/cli/runner.rb
+lib/fetcher/version.rb
 lib/fetcher/worker.rb

@@ -1,42 +1,36 @@
+# encoding: utf-8
+
+
+# more core and stlibs
+
+require 'optparse'
+
+# our own code (for command line interface/cli)
+
+require 'fetcher/opts'
+
 
 module Fetcher
-
-  class Opts
-  
-    def initialize
-      @hash = {}
-    end
-    
-    def put( key, value )
-      @hash[ key.to_s ] = value
-    end    
-  
-    def output_path
-      @hash.fetch( 'output', '.' )
-    end
-
-  end # class Opts
-
 
   class Runner
 
     include LogUtils::Logging
-    
+
     attr_reader :opts
-    
+        
     def initialize
-      @opts         = Opts.new
+      @opts = Opts.new
     end
     
     def run( args )
       opt=OptionParser.new do |cmd|
-    
+
         cmd.banner = "Usage: fetch [options] uri"
-    
-        cmd.on( '-o', '--output PATH', 'Output Path' ) { |s| opts.put( 'output', s ) }
+
+        cmd.on( '-o', '--output PATH', "Output Path (default is '#{opts.output_path}')" ) { |s| opts.output_path = s }
 
         # todo: find different letter for debug trace switch (use v for version?)
-        cmd.on( "-v", "--verbose", "Show debug trace" )  do
+        cmd.on( '-v', '--verbose', 'Show debug trace' )  do
            # todo/fix: use/change to logutils settings for level
            # logger.datetime_format = "%H:%H:%S"
            # logger.level = Logger::DEBUG
@@ -57,7 +51,7 @@ Further information:
 
 EOS
  
-        cmd.on_tail( "-h", "--help", "Show this message" ) do
+        cmd.on_tail( '-h', '--help', 'Show this message' ) do
            puts usage
            exit
         end

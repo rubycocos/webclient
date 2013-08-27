@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module Fetcher
 
   class Worker
@@ -85,7 +87,7 @@ module Fetcher
     
         logger.debug "GET #{uri.request_uri} uri=#{uri}, redirect_limit=#{redirect_limit}"
     
-        request    = Net::HTTP::Get.new( uri.request_uri, { 'User-Agent'=> 'slideshow'} )
+        request    = Net::HTTP::Get.new( uri.request_uri, { 'User-Agent' => "fetcher gem v#{VERSION}" } )
         if uri.instance_of? URI::HTTPS
           http.use_ssl = true
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE

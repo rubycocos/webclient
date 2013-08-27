@@ -1,7 +1,8 @@
+# encoding: utf-8
+
 ###
 # NB: for local testing run like:
 #
-# 1.8.x: ruby -Ilib -rrubygems lib/fetcher.rb
 # 1.9.x: ruby -Ilib lib/fetcher.rb
 
 # core and stlibs
@@ -9,7 +10,6 @@
 require 'yaml'
 require 'pp'
 require 'logger'
-require 'optparse'
 require 'fileutils'
 require 'uri'
 require 'net/http'
@@ -25,20 +25,22 @@ require 'logutils'
 
 # our own code
 
-require 'fetcher/runner'
+require 'fetcher/version'
 require 'fetcher/worker'
 
 
 module Fetcher
 
-  VERSION = '0.2.0'
-
   # version string for generator meta tag (includes ruby version)
   def self.banner
-    "Fetcher #{VERSION} on Ruby #{RUBY_VERSION} (#{RUBY_RELEASE_DATE}) [#{RUBY_PLATFORM}]"
+    "fetcher #{VERSION} on Ruby #{RUBY_VERSION} (#{RUBY_RELEASE_DATE}) [#{RUBY_PLATFORM}]"
   end
 
   def self.main
+
+    ## NB: only load (require) cli code if called
+
+    require 'fetcher/runner'
     
     # allow env variable to set RUBYOPT-style default command line options
     #   e.g. -o site 
@@ -64,4 +66,9 @@ module Fetcher
 end  # module Fetcher
 
 
-Fetcher.main if __FILE__ == $0
+if __FILE__ == $0
+  Fetcher.main
+else
+  # say hello
+  puts Fetcher.banner
+end

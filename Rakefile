@@ -1,5 +1,5 @@
 require 'hoe'
-require './lib/fetcher.rb'
+require './lib/fetcher/version.rb'
 
 Hoe.spec 'fetcher' do
   

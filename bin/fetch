@@ -9,7 +9,7 @@
 #
 # Set the executable bit in Linux. Example:
 #
-#    % chmod a+x bin/markdown
+#    % chmod a+x bin/fetch
 #
 
 require 'fetcher'
