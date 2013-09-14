@@ -54,13 +54,17 @@ module Fetcher
   end
 
   # convenience shortcuts
-  
+
   def self.copy( src, dest )
     Worker.new.copy( src, dest )
   end
 
   def self.read( src )
     Worker.new.read( src )
+  end
+
+  def self.get( src )
+    Worker.new.get( src )
   end
 
 end  # module Fetcher

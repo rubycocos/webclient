@@ -17,14 +17,22 @@ module Fetcher
     end
 
 
+    def get( src )
+      # return HTTPResponse (code,message,body,etc.)
+      logger.debug "fetch - get(_response) src: #{src}"
+
+      get_response( src )
+    end
+
+
     def read( src )
       # return contents (response body) a string
       logger.debug "fetch - copy src: #{src} into string"
       
       response = get_response( src )
       
-      # on error return empty string  - check: better return nil- why? why not??
-      return ''  if response.nil?
+      # on error return empty string; - check: better return nil- why? why not??
+      return ''  if response.code != '200'
 
       response.body.dup  # return string copy
     end
@@ -34,9 +42,9 @@ module Fetcher
       logger.debug "fetch - copy src: #{src} to dest: #{dest}"
 
       response = get_response( src )
-      
+
       # on error return; do NOT copy file; sorry
-      return  if response.nil?
+      return  if response.code != '200'
 
       # check for content type; use 'wb' for images
       if response.content_type =~ /image/
@@ -97,7 +105,8 @@ module Fetcher
   
         if response.code == '200'
           logger.debug "#{response.code} #{response.message}"
-          break
+          logger.debug "  content_type: #{response.content_type}, content_length: #{response.content_length}"
+          break  # will return response
         elsif (response.code == '301' || response.code == '302' || response.code == '303' || response.code == '307' )
           # 301 = moved permanently
           # 302 = found
@@ -111,15 +120,12 @@ module Fetcher
           end
           uri = newuri
         else
-          msg = "#{response.code} #{response.message}" 
-          puts "*** error: #{msg}"
-          return nil  # todo: throw StandardException?  
+          puts "*** error - fetch HTTP - #{response.code} #{response.message}"
+          break  # will return response
         end
       end
 
-      logger.debug "  content_type: #{response.content_type}, content_length: #{response.content_length}"
-
-      response # return respone or nil if error
+      response
     end # method copy
 
   end # class Worker

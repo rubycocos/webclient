@@ -7,9 +7,6 @@
 * forum :: [groups.google.com/group/webslideshow](https://groups.google.com/group/webslideshow)
 
 
-## Description
-
-
 ## Usage
 
 ### Copy (to File)
@@ -31,6 +28,45 @@ or
     worker = Fetcher::Worker.new
     txt = worker.read( 'https://raw.github.com/openfootball/at-austria/master/2013_14/bl.txt' )
 
+Note: The method `read` will return a string.
+
+
+### Get (HTTP Response)
+
+    response = Fetcher.get( 'https://raw.github.com/openfootball/at-austria/master/2013_14/bl.txt' )
+
+or
+
+    worker = Fetcher::Worker.new
+    response = worker.get( 'https://raw.github.com/openfootball/at-austria/master/2013_14/bl.txt' )
+
+Note: The method `get` will return a `Net::HTTPResponse` object
+(lets you use code, headers, body, etc.).
+
+    puts response.code             # => '404' 
+                                   #  Note: Returned (status) code is a string e.g. '404'
+    puts response.message          # => 'Not Found'
+    puts response.body
+    puts response.content_type     # => 'text/html; charset=UTF-8'
+    puts response['content-type']  # => 'text/html; charset=UTF-8'
+                                   #  Note: Headers are always downcased
+                                   #        e.g. use 'content-type' not 'Content-Type'
+
+
+## Command Line
+
+~~~
+fetch version 0.7.0 - Lets you fetch text documents or binary blobs via HTTP, HTTPS.
+
+Usage: fetch [options] URI
+    -o, --output PATH                Output Path (default is '.')
+    -v, --verbose                    Show debug trace
+
+
+Examples:
+  fetch https://raw.github.com/openfootball/at-austria/master/2013_14/bl.txt
+  fetch -o downloads https://raw.github.com/openfootball/at-austria/master/2013_14/bl.txt
+~~~
 
 
 ## Install
@@ -51,6 +87,9 @@ The [`sportdb`](https://github.com/geraldb/sport.db.ruby) gem that lets you read
 and more in plain text
 ships with the `fetcher` gem.
 
+The [`pluto`](https://github.com/geraldb/pluto) gem that lets you build web pages
+from published web feeds
+ships with the `fetcher` gem.
 
 
 ## License
