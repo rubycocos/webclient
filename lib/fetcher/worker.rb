@@ -14,7 +14,18 @@ module Fetcher
       if old_logger_do_not_use != nil
          puts "*** depreciated API call [Fetcher.initialize] - do NOT pass in logger; no longer required/needed; logger arg will get removed"
       end
+      
+      ### cache for conditional get (e.g. etags and last-modified headers/checks)
+      @cache = {}
+      @use_cache = false
     end
+
+    ## note: use cache[ uri ] = hash for headers+plus body+plus code(410,etc.)
+    #            cache[ uri ]
+    def clear_cache()              @cache = {};              end
+    def cache()                    @cache;                   end
+    def use_cache=(true_or_false)  @use_cache=true_or_false; end  # true|false
+    def use_cache?()               @use_cache;               end
 
 
     def get( src )
@@ -95,19 +106,41 @@ module Fetcher
     
         logger.debug "GET #{uri.request_uri} uri=#{uri}, redirect_limit=#{redirect_limit}"
     
-        request    = Net::HTTP::Get.new( uri.request_uri, { 'User-Agent' => "fetcher gem v#{VERSION}" } )
+        headers = { 'User-Agent' => "fetcher gem v#{VERSION}" }
+
+        if use_cache?
+          ## check for existing cache entry in cache store (lookup by uri)
+          ## todo/fix: normalize uri!!!! - how?
+          cache_entry = cache[ uri.request_uri ]
+          if cache_entry
+            logger.info "found cache entry for >#{uri.request_uri}<"
+            if cache_entry['etag']
+              logger.info "adding header If-None-Match (etag) >#{cache_entry['etag']}< for conditional GET"
+              headers['If-None-Match'] = cache_entry['etag']
+            end
+            if cache_entry['last-modified']
+              logger.info "adding header If-Modified-Since (last-modified) >#{cache_entry['last-modified']}< for conditional GET"
+              headers['If-Modified-Since'] = cache_entry['last-modified']
+            end
+          end
+        end
+
+        request = Net::HTTP::Get.new( uri.request_uri, headers )
         if uri.instance_of? URI::HTTPS
           http.use_ssl = true
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE
         end
-    
+
         response   = http.request( request )  
-  
+
         if response.code == '200'
           logger.debug "#{response.code} #{response.message}"
           logger.debug "  content_type: #{response.content_type}, content_length: #{response.content_length}"
           break  # will return response
-        elsif (response.code == '301' || response.code == '302' || response.code == '303' || response.code == '307' )
+        elsif( response.code == '304' ) # -- Not Modified - for conditional GETs (using etag,last-modified)
+          logger.debug "#{response.code} #{response.message}"
+          break  # will return response
+        elsif( response.code == '301' || response.code == '302' || response.code == '303' || response.code == '307' )
           # 301 = moved permanently
           # 302 = found
           # 303 = see other

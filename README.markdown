@@ -1,7 +1,7 @@
 # fetcher - Fetch Text Documents or Binary Blobs via HTTP, HTTPS
 
-* home  :: [github.com/geraldb/fetcher](https://github.com/geraldb/fetcher)
-* bugs  :: [github.com/geraldb/fetcher/issues](https://github.com/geraldb/fetcher/issues)
+* home  :: [github.com/rubylibs/fetcher](https://github.com/rubylibs/fetcher)
+* bugs  :: [github.com/rubylibs/fetcher/issues](https://github.com/rubylibs/fetcher/issues)
 * gem   :: [rubygems.org/gems/fetcher](https://rubygems.org/gems/fetcher)
 * rdoc  :: [rubydoc.info/gems/fetcher](http://rubydoc.info/gems/fetcher)
 * forum :: [groups.google.com/group/webslideshow](https://groups.google.com/group/webslideshow)
@@ -56,7 +56,7 @@ Note: The method `get` will return a `Net::HTTPResponse` object
 ## Command Line
 
 ~~~
-fetch version 0.7.0 - Lets you fetch text documents or binary blobs via HTTP, HTTPS.
+fetch version 0.5.0 - Lets you fetch text documents or binary blobs via HTTP, HTTPS.
 
 Usage: fetch [options] URI
     -o, --output PATH                Output Path (default is '.')
@@ -83,12 +83,12 @@ that lets you create slide shows
 and author slides in plain text using a wiki-style markup language that's easy-to-write and easy-to-read
 ships with the `fetcher` gem.
 
-The [`sportdb`](https://github.com/geraldb/sport.db.ruby) gem that lets you read football (soccer) fixtures
-and more in plain text
+The [`pluto`](https://github.com/feedreader) gem that lets you build web pages
+from published web feeds
 ships with the `fetcher` gem.
 
-The [`pluto`](https://github.com/geraldb/pluto) gem that lets you build web pages
-from published web feeds
+The [`sportdb`](https://github.com/geraldb/sport.db.ruby) gem that lets you read football (soccer) fixtures
+and more in plain text
 ships with the `fetcher` gem.
 
 
