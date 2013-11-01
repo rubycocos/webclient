@@ -50,6 +50,11 @@ module Fetcher
 
 
     def copy( src, dest )
+      ### fix: return true - success or
+      #               false - error!!!
+
+      ## todo: add file protocol - why? why not??
+
       logger.debug "fetch - copy src: #{src} to dest: #{dest}"
 
       response = get_response( src )
@@ -111,9 +116,14 @@ module Fetcher
         if use_cache?
           ## check for existing cache entry in cache store (lookup by uri)
           ## todo/fix: normalize uri!!!! - how?
-          cache_entry = cache[ uri.request_uri ]
+          ##  - remove query_string ?? fragement ?? why? why not??
+          
+          ## note:  using uri.to_s  should return full uri e.g. http://example.com/page.html
+
+
+          cache_entry = cache[ uri.to_s ]
           if cache_entry
-            logger.info "found cache entry for >#{uri.request_uri}<"
+            logger.info "found cache entry for >#{uri.to_s}<"
             if cache_entry['etag']
               logger.info "adding header If-None-Match (etag) >#{cache_entry['etag']}< for conditional GET"
               headers['If-None-Match'] = cache_entry['etag']
