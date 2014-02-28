@@ -33,8 +33,13 @@ module Fetcher
 
   # version string for generator meta tag (includes ruby version)
   def self.banner
-    "fetcher #{VERSION} on Ruby #{RUBY_VERSION} (#{RUBY_RELEASE_DATE}) [#{RUBY_PLATFORM}]"
+    "fetcher/#{VERSION} on Ruby #{RUBY_VERSION} (#{RUBY_RELEASE_DATE}) [#{RUBY_PLATFORM}]"
   end
+
+  def self.root
+    "#{File.expand_path( File.dirname(File.dirname(__FILE__)) )}"
+  end
+
 
   def self.main
 
@@ -53,6 +58,7 @@ module Fetcher
     Runner.new.run(args)
   end
 
+  #############################
   # convenience shortcuts
 
   def self.copy( src, dest )
