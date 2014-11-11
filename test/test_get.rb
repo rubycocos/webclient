@@ -2,7 +2,7 @@
 
 require 'helper'
 
-class TestGet < MiniTest::Unit::TestCase
+class TestGet < MiniTest::Test
 
   def test_get
     url = 'https://raw.github.com/rubylibs/fetcher/master/README.md'

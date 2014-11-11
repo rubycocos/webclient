@@ -49,7 +49,7 @@ module Fetcher
     end
 
 
-    def copy( src, dest )
+    def copy( src, dest, opts={} )
       ### fix: return true - success or
       #               false - error!!!
 
@@ -59,18 +59,30 @@ module Fetcher
 
       response = get_response( src )
 
+      #################
+      #### fix fix fix: throw error (exception) if not 200!!!!
+      ##  check if http error (exception) exits??
+
       # on error return; do NOT copy file; sorry
       return  if response.code != '200'
 
+      ### check:
+      ## why not always use wb???
+      ##  how is it differet for text files?
+      ##  will convert newlines (from windows to unix) ???
+
       # check for content type; use 'wb' for images
-      if response.content_type =~ /image/
+      if response.content_type =~ /image/ ||
+         response.content_type =~ /zip/    ## use application/zip or something - why? why not??
         logger.debug '  switching to binary'
-        flags = 'wb'
+        mode = 'wb'
       else
-        flags = 'w'
+        mode = 'w'
       end
   
-      File.open( dest, flags ) do |f|
+      mode = opts[:mode]  if opts[:mode]  # if mode flags passed in -take precedence
+
+      File.open( dest, mode ) do |f|
         f.write( response.body )
       end
     end

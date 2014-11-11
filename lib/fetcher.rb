@@ -25,21 +25,11 @@ require 'logutils'
 
 # our own code
 
-require 'fetcher/version'
+require 'fetcher/version'   # let version always go first
 require 'fetcher/worker'
 
 
 module Fetcher
-
-  # version string for generator meta tag (includes ruby version)
-  def self.banner
-    "fetcher/#{VERSION} on Ruby #{RUBY_VERSION} (#{RUBY_RELEASE_DATE}) [#{RUBY_PLATFORM}]"
-  end
-
-  def self.root
-    "#{File.expand_path( File.dirname(File.dirname(__FILE__)) )}"
-  end
-
 
   def self.main
 
@@ -58,11 +48,12 @@ module Fetcher
     Runner.new.run(args)
   end
 
+
   #############################
   # convenience shortcuts
 
-  def self.copy( src, dest )
-    Worker.new.copy( src, dest )
+  def self.copy( src, dest, opts={} )
+    Worker.new.copy( src, dest, opts )
   end
 
   def self.read( src )
@@ -79,6 +70,5 @@ end  # module Fetcher
 if __FILE__ == $0
   Fetcher.main
 else
-  # say hello
-  puts Fetcher.banner
+  puts Fetcher.banner    # say hello
 end
