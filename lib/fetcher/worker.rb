@@ -2,6 +2,27 @@
 
 module Fetcher
 
+  class Error < StandardError
+  end
+
+  ####
+  # todo/check:
+  #  rename to HttpRequestError or similar??
+  #  use "common" error class - why? why not?
+
+  class HttpError < Error
+    attr_reader :code, :message
+
+    def initialize( code, message )
+      @code, @message = code, message
+    end
+
+    def to_s
+      "HTTP request failed (NOK) => #{@code} #{@message}"
+    end
+  end
+
+
   class Worker
 
     include LogUtils::Logging
@@ -59,12 +80,10 @@ module Fetcher
 
       response = get_response( src )
 
-      #################
-      #### fix fix fix: throw error (exception) if not 200!!!!
-      ##  check if http error (exception) exits??
-
-      # on error return; do NOT copy file; sorry
-      return  if response.code != '200'
+      # NOTE: on error (NOK) raise exception; do NOT copy file; sorry
+      if response.code != '200'
+        raise HttpError.new( response.code, response.message )
+      end
 
       ### check:
       ## why not always use wb???
