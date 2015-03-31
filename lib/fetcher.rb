@@ -7,16 +7,17 @@
 
 # core and stlibs
 
-require 'yaml'
-require 'pp'
-require 'logger'
-require 'fileutils'
+require 'yaml'              ### used ??? remove??
+require 'logger'            ### used ??? remove??
+
+require 'fileutils'         ### used ??? remove??
 require 'uri'
 require 'net/http'
 require 'net/https'
 require 'ostruct'
 require 'date'
 require 'cgi'
+require 'pp'
 
 
 # 3rd party gems
@@ -56,9 +57,19 @@ module Fetcher
     Worker.new.copy( src, dest, opts )
   end
 
+
   def self.read( src )
     Worker.new.read( src )
   end
+
+  def self.read_blob!( src )
+    Worker.new.read_blob!( src )
+  end
+
+  def self.read_utf8!( src )
+    Worker.new.read_utf8!( src )
+  end
+
 
   def self.get( src )
     Worker.new.get( src )
@@ -70,5 +81,6 @@ end  # module Fetcher
 if __FILE__ == $0
   Fetcher.main
 else
-  puts Fetcher.banner    # say hello
+  # say hello
+  puts Fetcher.banner    if $DEBUG || (defined?($RUBYLIBS_DEBUG) && $RUBYLIBS_DEBUG)
 end

@@ -58,15 +58,43 @@ module Fetcher
 
 
     def read( src )
-      # return contents (response body) a string
+      # return contents (response body) as (ascii/binary) string
       logger.debug "fetch - copy src: #{src} into string"
-      
-      response = get_response( src )
-      
-      # on error return empty string; - check: better return nil- why? why not??
-      return ''  if response.code != '200'
 
-      response.body.dup  # return string copy
+      response = get_response( src )
+
+      # on error return empty string; - check: better return nil- why? why not??
+      if response.code != '200'
+        raise HttpError.new( response.code, response.message )
+      end
+
+      response.body.dup  # return string copy - why? why not?? (use to_s?)
+    end
+
+    def read_blob!( src )
+      ## note: same as read for now
+      read( src )
+    end
+
+    def read_utf8!( src )
+      # return contents (response body) a string
+      logger.debug "fetch - copy src: #{src} into utf8 string"
+
+      response = get_response( src )
+
+      # on error throw exception - why? why not??
+      if response.code != '200'
+        raise HttpError.new( response.code, response.message )
+      end
+
+      ###
+      # Note: Net::HTTP will NOT set encoding UTF-8 etc.
+      # will be set to ASCII-8BIT == BINARY == Encoding Unknown; Raw Bytes Here
+      # thus, set/force encoding to utf-8
+
+      txt = response.body.to_s
+      txt = txt.force_encoding( Encoding::UTF_8 )
+      txt
     end
 
 
@@ -131,7 +159,7 @@ module Fetcher
       
       http_proxy = Net::HTTP::Proxy( proxy.host, proxy.port, proxy.user, proxy.password )
 
-      redirect_limit = 4
+      redirect_limit = 6
       response = nil
 
       until false

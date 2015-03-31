@@ -37,5 +37,4 @@ class TestGet < MiniTest::Test
     assert_equal '404', res.code
   end
 
-
-end # class TestCopy
+end # class TestGet

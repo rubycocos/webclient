@@ -24,7 +24,7 @@ Hoe.spec 'fetcher' do
   self.licenses = ['Public Domain']
 
   self.spec_extras = {
-   :required_ruby_version => '>= 1.9.2'
+   required_ruby_version: '>= 1.9.2'
   }
   
 end
