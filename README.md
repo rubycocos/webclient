@@ -1,7 +1,7 @@
 # fetcher - Fetch Text Documents or Binary Blobs via HTTP, HTTPS
 
-* home  :: [github.com/rubylibs/fetcher](https://github.com/rubylibs/fetcher)
-* bugs  :: [github.com/rubylibs/fetcher/issues](https://github.com/rubylibs/fetcher/issues)
+* home  :: [github.com/rubycoco/fetcher](https://github.com/rubycoco/fetcher)
+* bugs  :: [github.com/rubycoco/fetcher/issues](https://github.com/rubycoco/fetcher/issues)
 * gem   :: [rubygems.org/gems/fetcher](https://rubygems.org/gems/fetcher)
 * rdoc  :: [rubydoc.info/gems/fetcher](http://rubydoc.info/gems/fetcher)
 * forum :: [groups.google.com/group/webslideshow](https://groups.google.com/group/webslideshow)
@@ -43,7 +43,7 @@ or
 Note: The method `get` will return a `Net::HTTPResponse` object
 (lets you use code, headers, body, etc.).
 
-    puts response.code             # => '404' 
+    puts response.code             # => '404'
                                    #  Note: Returned (status) code is a string e.g. '404'
     puts response.message          # => 'Not Found'
     puts response.body
@@ -55,7 +55,7 @@ Note: The method `get` will return a `Net::HTTPResponse` object
 
 ## Command Line
 
-~~~
+```
 fetch version 0.5.0 - Lets you fetch text documents or binary blobs via HTTP, HTTPS.
 
 Usage: fetch [options] URI
@@ -66,7 +66,7 @@ Usage: fetch [options] URI
 Examples:
   fetch https://raw.github.com/openfootball/at-austria/master/2013_14/bl.txt
   fetch -o downloads https://raw.github.com/openfootball/at-austria/master/2013_14/bl.txt
-~~~
+```
 
 
 ## Install

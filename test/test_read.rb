@@ -1,10 +1,9 @@
-# encoding: utf-8
+###
+#  to run use
+#     ruby -I ./lib -I ./test test/test_read.rb
 
 require 'helper'
 
-###
-# to run use
-#  ruby -I ./lib -I ./test test/test_read.rb
 
 class TestRead < MiniTest::Test
 

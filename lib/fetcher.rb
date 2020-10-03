@@ -14,7 +14,7 @@ require 'fileutils'         ### used ??? remove??
 require 'uri'
 require 'net/http'
 require 'net/https'
-require 'ostruct'
+require 'ostruct'           ## used for proxy
 require 'date'
 require 'cgi'
 require 'pp'
@@ -37,15 +37,15 @@ module Fetcher
     ## NB: only load (require) cli code if called
 
     require 'fetcher/cli/runner'
-    
+
     # allow env variable to set RUBYOPT-style default command line options
-    #   e.g. -o site 
+    #   e.g. -o site
     fetcheropt = ENV[ 'FETCHEROPT' ]
-    
+
     args = []
     args += fetcheropt.split if fetcheropt
     args += ARGV.dup
-    
+
     Runner.new.run(args)
   end
 
