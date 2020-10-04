@@ -2,8 +2,8 @@
 
 webget gem - yet (another) network client for world wide web (www) requests via HTTP
 
-* home  :: [github.com/rubycoco/webget](https://github.com/rubycoco/webget)
-* bugs  :: [github.com/rubycoco/webget/issues](https://github.com/rubycoco/webget/issues)
+* home  :: [github.com/rubycoco/fetcher](https://github.com/rubycoco/fetcher)
+* bugs  :: [github.com/rubycoco/fetcher/issues](https://github.com/rubycoco/fetcher/issues)
 * gem   :: [rubygems.org/gems/webget](https://rubygems.org/gems/webget)
 * rdoc  :: [rubydoc.info/gems/webget](http://rubydoc.info/gems/webget)
 
