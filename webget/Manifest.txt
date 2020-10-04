@@ -1,0 +1,9 @@
+CHANGELOG.md
+Manifest.txt
+README.md
+Rakefile
+lib/webget.rb
+lib/webget/version.rb
+lib/webget/webcache.rb
+lib/webget/webclient.rb
+lib/webget/webget.rb

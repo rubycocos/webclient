@@ -3,7 +3,8 @@
 
 Gems:
 
-- [fetcher](fetcher) - Fetch Text Documents or Binary Blobs via HTTP, HTTPS
+- [fetcher](fetcher) - fetch text documents or binary blobs via HTTP / HTTPS
+- [webget](webget) - yet (another) network client for world wide web (www) requests
 
 
 

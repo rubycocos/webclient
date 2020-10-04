@@ -7,14 +7,15 @@ require 'helper'
 class TestGet < MiniTest::Test
 
   def test_get
-    url = 'https://raw.github.com/rubylibs/fetcher/master/README.md'
+    url = 'https://raw.githubusercontent.com/rubycoco/fetcher/master/fetcher/README.md'
     worker = Fetcher::Worker.new
     res = worker.get( url )
     pp res
 
-    assert_equal '200', res.code             # note: returned code is a string e.g. '200' not 200
+    assert_equal '200',        res.code             # note: returned code is a string e.g. '200' not 200
     assert_equal 'OK',         res.message
     assert_equal 'text/plain', res.content_type
+
     assert_equal File.read( './README.md' ), res.body   # local README.md should match remote README.md
   end
 

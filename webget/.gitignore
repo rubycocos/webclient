@@ -1,0 +1,18 @@
+# ignore generated folders
+pkg/
+doc/
+
+# ignore jekyll generated output
+site/_site/
+
+dl/
+dl2/
+o/
+tmp/
+temp/
+cache/
+
+####
+# ignore all databases
+*.db
+

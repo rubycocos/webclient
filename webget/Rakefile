@@ -1,0 +1,28 @@
+require 'hoe'
+require './lib/webget/version.rb'
+
+Hoe.spec 'webget' do
+
+  self.version = Webget::VERSION
+
+  self.summary = 'webget gem - yet (another) network client for world wide web (www) requests'
+  self.description = summary
+
+  self.urls    = { home: 'https://github.com/rubycoco/fetcher' }
+
+  self.author  = 'Gerald Bauer'
+  self.email   = 'ruby-talk@ruby-lang.org'
+
+  # switch extension to .markdown for gihub formatting
+  self.readme_file  = 'README.md'
+  self.history_file = 'CHANGELOG.md'
+
+  self.extra_deps = []
+
+  self.licenses = ['Public Domain']
+
+  self.spec_extras = {
+   required_ruby_version: '>= 2.2.2'
+  }
+
+end
