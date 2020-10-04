@@ -27,17 +27,10 @@ module Fetcher
 
     include LogUtils::Logging
 
-### todo/fix:
-# remove logger from c'tor
-#  use logutils instead
 
-    def initialize( old_logger_do_not_use=nil )
-      if old_logger_do_not_use != nil
-         puts "*** depreciated API call [Fetcher.initialize] - do NOT pass in logger; no longer required/needed; logger arg will get removed"
-      end
-      
+    def initialize
       ### cache for conditional get (e.g. etags and last-modified headers/checks)
-      @cache = {}
+      @cache     = {}
       @use_cache = false
     end
 
@@ -126,7 +119,7 @@ module Fetcher
       else
         mode = 'w'
       end
-  
+
       mode = opts[:mode]  if opts[:mode]  # if mode flags passed in -take precedence
 
       File.open( dest, mode ) do |f|
@@ -135,15 +128,15 @@ module Fetcher
     end
 
 
-## todo: add file protocol 
+## todo: add file protocol
 
     def get_response( src )
       uri = URI.parse( src )
-  
+
       # new code: honor proxy env variable HTTP_PROXY
       proxy = ENV['HTTP_PROXY']
       proxy = ENV['http_proxy'] if proxy.nil?   # try possible lower/case env variable (for *nix systems) is this necessary??
-    
+
       if proxy
         proxy = URI.parse( proxy )
         logger.debug "using net http proxy: proxy.host=#{proxy.host}, proxy.port=#{proxy.port}"
@@ -156,7 +149,7 @@ module Fetcher
         logger.debug "using direct net http access; no proxy configured"
         proxy = OpenStruct.new   # all fields return nil (e.g. proxy.host, etc.)
       end
-      
+
       http_proxy = Net::HTTP::Proxy( proxy.host, proxy.port, proxy.user, proxy.password )
 
       redirect_limit = 6
@@ -165,18 +158,18 @@ module Fetcher
       until false
         raise ArgumentError, 'HTTP redirect too deep' if redirect_limit == 0
         redirect_limit -= 1
-      
+
         http = http_proxy.new( uri.host, uri.port )
-    
+
         logger.debug "GET #{uri.request_uri} uri=#{uri}, redirect_limit=#{redirect_limit}"
-    
+
         headers = { 'User-Agent' => "fetcher gem v#{VERSION}" }
 
         if use_cache?
           ## check for existing cache entry in cache store (lookup by uri)
           ## todo/fix: normalize uri!!!! - how?
           ##  - remove query_string ?? fragement ?? why? why not??
-          
+
           ## note:  using uri.to_s  should return full uri e.g. http://example.com/page.html
 
 
@@ -200,7 +193,7 @@ module Fetcher
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE
         end
 
-        response   = http.request( request )  
+        response   = http.request( request )
 
         if response.code == '200'
           logger.debug "#{response.code} #{response.message}"

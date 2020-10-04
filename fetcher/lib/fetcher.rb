@@ -1,23 +1,24 @@
-# encoding: utf-8
-
 ###
-# NB: for local testing run like:
+# note: for local testing run like:
 #
 # 1.9.x: ruby -Ilib lib/fetcher.rb
 
 # core and stlibs
 
-require 'yaml'              ### used ??? remove??
-require 'logger'            ### used ??? remove??
 
-require 'fileutils'         ### used ??? remove??
+require 'pp'
+require 'time'
+require 'date'
+
 require 'uri'
 require 'net/http'
 require 'net/https'
-require 'ostruct'           ## used for proxy
-require 'date'
 require 'cgi'
-require 'pp'
+require 'ostruct'           ## used for proxy
+require 'fileutils'         ### used ??? remove??
+
+require 'json'
+require 'yaml'
 
 
 # 3rd party gems
@@ -34,7 +35,7 @@ module Fetcher
 
   def self.main
 
-    ## NB: only load (require) cli code if called
+    ## note: only load (require) cli code if called
 
     require 'fetcher/cli/runner'
 
