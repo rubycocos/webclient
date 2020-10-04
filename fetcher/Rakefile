@@ -11,7 +11,7 @@ Hoe.spec 'fetcher' do
   self.urls    = { home: 'https://github.com/rubycoco/fetcher' }
 
   self.author  = 'Gerald Bauer'
-  self.email   = 'webslideshow@googlegroups.com'
+  self.email   = 'wwwmake@googlegroups.com'
 
   # switch extension to .markdown for gihub formatting
   self.readme_file  = 'README.md'
