@@ -62,7 +62,8 @@ module Webcache
    alias_method :exist?, :cached?
  end
  def self.url_to_id( url ) cache.url_to_id( url ); end  ## todo/check: rename to just id or something - why? why not?
- def self.read( url ) cache.read( url ); end
+ def self.read( url )       cache.read( url );      end
+ def self.read_json( url )  cache.read_json( url ); end
 
 
 class DiskCache
@@ -77,6 +78,14 @@ class DiskCache
     body_path = "#{Webcache.root}/#{url_to_path( url )}"
     File.open( body_path, 'r:utf-8' ) {|f| f.read }
   end
+
+  def read_json( url )
+    body_path = "#{Webcache.root}/#{url_to_path( url )}"
+    txt = File.open( body_path, 'r:utf-8' ) {|f| f.read }
+    data = JSON.parse( txt )
+    data
+  end
+
 
 
   ## add more save / put / etc. aliases - why? why not?
