@@ -1,7 +1,7 @@
 # fetcher - Fetch Text Documents or Binary Blobs via HTTP, HTTPS
 
-* home  :: [github.com/rubycoco/fetcher](https://github.com/rubycoco/fetcher)
-* bugs  :: [github.com/rubycoco/fetcher/issues](https://github.com/rubycoco/fetcher/issues)
+* home  :: [github.com/rubycoco/webclient](https://github.com/rubycoco/webclient)
+* bugs  :: [github.com/rubycoco/webclient/issues](https://github.com/rubycoco/webclient/issues)
 * gem   :: [rubygems.org/gems/fetcher](https://rubygems.org/gems/fetcher)
 * rdoc  :: [rubydoc.info/gems/fetcher](http://rubydoc.info/gems/fetcher)
 * forum :: [groups.google.com/group/wwwmake](https://groups.google.com/group/wwwmake)

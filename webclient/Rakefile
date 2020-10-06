@@ -1,25 +1,23 @@
 require 'hoe'
-require './lib/fetcher/version.rb'
+require './lib/webclient/version.rb'
 
-Hoe.spec 'fetcher' do
+Hoe.spec 'webclient' do
 
-  self.version = Fetcher::VERSION
+  self.version = Webclient::VERSION
 
-  self.summary = 'fetcher - Fetch Text Documents or Binary Blobs via HTTP, HTTPS'
+  self.summary = 'webclient gem - yet (another) universal network client interface for world wide web (www) requests via HTTP'
   self.description = summary
 
   self.urls    = { home: 'https://github.com/rubycoco/webclient' }
 
   self.author  = 'Gerald Bauer'
-  self.email   = 'wwwmake@googlegroups.com'
+  self.email   = 'ruby-talk@ruby-lang.org'
 
   # switch extension to .markdown for gihub formatting
   self.readme_file  = 'README.md'
   self.history_file = 'CHANGELOG.md'
 
-  self.extra_deps = [
-    ['logutils', '>= 0.6']
-  ]
+  self.extra_deps = []
 
   self.licenses = ['Public Domain']
 

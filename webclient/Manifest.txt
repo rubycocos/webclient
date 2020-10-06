@@ -1,0 +1,7 @@
+CHANGELOG.md
+Manifest.txt
+README.md
+Rakefile
+lib/webclient.rb
+lib/webclient/version.rb
+lib/webclient/webclient.rb

@@ -5,5 +5,4 @@ Rakefile
 lib/webget.rb
 lib/webget/version.rb
 lib/webget/webcache.rb
-lib/webget/webclient.rb
 lib/webget/webget.rb

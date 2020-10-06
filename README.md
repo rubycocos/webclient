@@ -4,7 +4,8 @@
 Gems:
 
 - [fetcher](fetcher) - fetch text documents or binary blobs via HTTP / HTTPS
-- [webget](webget) - yet (another) network client for world wide web (www) requests
+- [webget](webget) - a web (go get) crawler incl. web cache
+- [webclient](webclient) - yet (another) universal network client interface for world wide web (www) requests via HTTP
 
 
 
