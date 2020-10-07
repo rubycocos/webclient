@@ -47,7 +47,7 @@ class Webclient
   end # (nested) class Response
 
 
-def self.get( url, headers: {} )
+def self.get( url, headers: {}, auth: [] )
 
   uri = URI.parse( url )
   http = Net::HTTP.new( uri.host, uri.port )
@@ -74,6 +74,17 @@ def self.get( url, headers: {} )
     end
   end
 
+
+  if auth.size == 2   ## e.g. ['user', 'password']
+    ## always assume basic auth for now
+    ##  auth[0]  => user
+    ##  auth[1]  => password
+    request.basic_auth( auth[0], auth[1] )
+    puts "  using basic auth - user: #{auth[0]}, password: ***"
+  end
+
+
+  puts "GET #{uri}..."
 
   response = http.request( request )
 
