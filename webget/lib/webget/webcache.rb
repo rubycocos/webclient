@@ -151,6 +151,19 @@ class DiskCache
             puts "ERROR: expected request_uri for >#{host_dir}< ending with '/'; got: >#{req_path}<"
             exit 1
           end
+    elsif host_dir.index( 'tipp3.at' )
+      req_path = req_path.sub( '.jsp', '' )  # shorten - cut off .jsp extension
+
+      ##   change ? to -I-
+      ##   change = to ~
+      ##   Example:
+      ##   sportwetten/classicresults.jsp?oddsetProgramID=888
+      ##     =>
+      ##   sportwetten/classicresults-I-oddsetProgramID~888
+      req_path = req_path.gsub( '?', '-I-' )
+                         .gsub( '=', '~')
+
+      req_path = "#{req_path}.html"
     elsif host_dir.index( 'football-data.org' )
       req_path = req_path.sub( 'v2/', '' )  # shorten - cut off v2/
 
