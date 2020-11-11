@@ -18,7 +18,8 @@ Hoe.spec 'webget' do
   self.history_file = 'CHANGELOG.md'
 
   self.extra_deps = [
-    ['webclient', '>= 0.1.0']
+    ['webclient', '>= 0.2.0'],
+    ['csvreader', '>= 1.2.4'],
   ]
 
   self.licenses = ['Public Domain']

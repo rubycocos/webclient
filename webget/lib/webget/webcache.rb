@@ -54,16 +54,18 @@ module Webcache
  ### "interface" for "generic" cache storage (might be sqlite database or filesystem)
  def self.cache() @cache ||= DiskCache.new; end
 
- def self.record( url, response, format: 'html' )
-   cache.record( url, response, format: format );
+ def self.record( url, response, encoding: 'UTF-8', format: 'html' )
+   cache.record( url, response, encoding: encoding, format: format );
  end
  def self.cached?( url ) cache.cached?( url ); end
  class << self
    alias_method :exist?, :cached?
  end
- def self.url_to_id( url ) cache.url_to_id( url ); end  ## todo/check: rename to just id or something - why? why not?
+ def self.url_to_id( url )  cache.url_to_id( url ); end  ## todo/check: rename to just id or something - why? why not?
  def self.read( url )       cache.read( url );      end
  def self.read_json( url )  cache.read_json( url ); end
+ def self.read_csv( url )   cache.read_csv( url );  end
+
 
 
 class DiskCache
@@ -86,11 +88,17 @@ class DiskCache
     data
   end
 
+  def read_csv( url )
+    body_path = "#{Webcache.root}/#{url_to_path( url )}"
+    txt = File.open( body_path, 'r:utf-8' ) {|f| f.read }
+    data = CsvHash.parse( txt )
+    data
+  end
 
 
   ## add more save / put / etc. aliases - why? why not?
   ##  rename to record_html - why? why not?
-  def record( url, response, format: 'html' )
+  def record( url, response, encoding: 'UTF-8', format: 'html' )
 
     body_path = "#{Webcache.root}/#{url_to_path( url )}"
     meta_path = "#{body_path}.meta.txt"
@@ -102,14 +110,22 @@ class DiskCache
     puts "[cache] saving #{body_path}..."
 
     ## todo/check: verify content-type - why? why not?
+    ## note - for now respone.text always assume (converted) to utf8!!!!!!!!!
     if format == 'json'
       File.open( body_path, 'w:utf-8' ) {|f| f.write( JSON.pretty_generate( response.json )) }
+    elsif format == 'csv'
+      ## fix: newlines - always use "unix" style" - why? why not?
+      text = response.text( encoding: encoding ).gsub( "\r\n", "\n" )
+      File.open( body_path, 'w:utf-8' ) {|f| f.write( text ) }
     else
-      ## note - for now always assume utf8!!!!!!!!!
-      File.open( body_path, 'w:utf-8' ) {|f| f.write( response.text ) }
+      text = response.text( encoding: encoding )
+      File.open( body_path, 'w:utf-8' ) {|f| f.write( text ) }
     end
 
+
     File.open( meta_path, 'w:utf-8' ) do |f|
+      ## todo/check:
+      ##  do headers also need to converted (like text) if encoding is NOT utf-8 ???
       response.headers.each do |key, value|  # iterate all response headers
         f.write( "#{key}: #{value}" )
         f.write( "\n" )
@@ -164,6 +180,9 @@ class DiskCache
                          .gsub( '=', '~')
 
       req_path = "#{req_path}.html"
+    elsif host_dir.index( 'football-data.co.uk' )
+      req_path = req_path.sub( 'mmz4281/', '' )  # shorten - cut off mmz4281/
+      req_path = req_path.sub( 'new/', '' )      # shorten - cut off new/
     elsif host_dir.index( 'football-data.org' )
       req_path = req_path.sub( 'v2/', '' )  # shorten - cut off v2/
 

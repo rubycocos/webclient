@@ -19,7 +19,7 @@ class Webget   # a web (go get) crawler
 
 
 
-  def self.call( url, headers: {} )  ## assumes json format
+  def self.call( url, headers: {} )  ## assumes json format (note - encoding always utf-8 by definition! - double check?)
     puts "  sleep #{config.sleep} sec(s)..."
     sleep( config.sleep )   ## slow down - sleep 3secs before each http request
 
@@ -40,8 +40,8 @@ class Webget   # a web (go get) crawler
     response
   end  # method self.call
 
-
-  def self.page( url, headers: {} )  ## assumes html format
+  ## todo/check: rename encoding to html/http-like charset - why? why not?
+  def self.page( url, encoding: 'UTF-8', headers: {} )  ## assumes html format
     puts "  sleep #{config.sleep} sec(s)..."
     sleep( config.sleep )   ## slow down - sleep 3secs before each http request
 
@@ -49,7 +49,8 @@ class Webget   # a web (go get) crawler
 
     if response.status.ok?  ## must be HTTP 200
       puts "#{response.status.code} #{response.status.message}"
-      Webcache.record( url, response )   ## assumes format: html (default)
+      Webcache.record( url, response,
+                       encoding: encoding  )   ## assumes format: html (default)
     else
       ## todo/check - log error
       puts "!! ERROR - #{response.status.code} #{response.status.message}:"
@@ -59,6 +60,31 @@ class Webget   # a web (go get) crawler
     ## to be done / continued
     response
   end  # method self.page
+
+
+  ## todo/check: rename to csv or file or records or - why? why not?
+  ## todo/check: rename encoding to html/http-like charset - why? why not?
+  def self.dataset( url, encoding: 'UTF-8', headers: {} )  ## assumes csv format
+    puts "  sleep #{config.sleep} sec(s)..."
+    sleep( config.sleep )   ## slow down - sleep 3secs before each http request
+
+    response = Webclient.get( url, headers: headers )
+
+    if response.status.ok?  ## must be HTTP 200
+      puts "#{response.status.code} #{response.status.message}"
+      Webcache.record( url, response,
+                       encoding: encoding,
+                       format:   'csv' )    ## pass along csv format - why? why not?
+    else
+      ## todo/check - log error
+      puts "!! ERROR - #{response.status.code} #{response.status.message}:"
+      pp response.raw  ## note: dump inner (raw) response (NOT the wrapped)
+    end
+
+    ## to be done / continued
+    response
+  end  # method self.dataset
+
 
 end  # class Webget
 

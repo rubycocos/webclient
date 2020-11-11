@@ -8,16 +8,37 @@ class Webclient
     def raw() @response; end
 
 
-    def text
+    ## todo/check: rename encoding to html/http-like charset - why? why not?
+    def text( encoding: 'UTF-8' )
       # note: Net::HTTP will NOT set encoding UTF-8 etc.
       # will be set to ASCII-8BIT == BINARY == Encoding Unknown; Raw Bytes Here
       # thus, set/force encoding to utf-8
       text = @response.body.to_s
-      text = text.force_encoding( Encoding::UTF_8 )
+      if encoding.downcase == 'utf-8'
+         text = text.force_encoding( Encoding::UTF_8 )
+      else
+    ## [debug] GET=http://www.football-data.co.uk/mmz4281/0405/SC0.csv
+    ##    Encoding::UndefinedConversionError: "\xA0" from ASCII-8BIT to UTF-8
+    ##     note:  0xA0 (160) is NBSP (non-breaking space) in Windows-1252
+
+    ## note: assume windows encoding (for football-data.uk)
+    ##   use "Windows-1252" for input and convert to utf-8
+    ##
+    ##    see https://www.justinweiss.com/articles/3-steps-to-fix-encoding-problems-in-ruby/
+    ##    see https://en.wikipedia.org/wiki/Windows-1252
+    ## txt = txt.force_encoding( 'Windows-1252' )
+    ## txt = txt.encode( 'UTF-8' )
+    ##   Encoding::UTF_8 => 'UTF-8'
+        puts " [debug] converting response.text encoding from >#{encoding}< to >UTF-8<"
+
+        text = text.force_encoding( encoding )
+        text = text.encode( Encoding::UTF_8 )
+      end
+
       text
     end
 
-    ## convenience helper; returns parsed json data
+    ## convenience helper; returns parsed json data; note: always assume utf-8 (text) encoding
     def json() JSON.parse( text ); end
 
 
