@@ -180,6 +180,9 @@ class DiskCache
                          .gsub( '=', '~')
 
       req_path = "#{req_path}.html"
+    elsif host_dir.index( 'fbref.com' )
+      req_path = req_path.sub( 'en/', '' )      # shorten - cut off en/
+      req_path = "#{req_path}.html"             # auto-add html extension
     elsif host_dir.index( 'football-data.co.uk' )
       req_path = req_path.sub( 'mmz4281/', '' )  # shorten - cut off mmz4281/
       req_path = req_path.sub( 'new/', '' )      # shorten - cut off new/

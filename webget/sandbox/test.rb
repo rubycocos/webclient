@@ -48,3 +48,14 @@ puts res.status.ok?
 puts
 puts "text:"
 puts res.text( encoding: 'Windows-1252' )
+
+
+url = 'https://fbref.com/en/comps/56/schedule/Austrian-Bundesliga-Scores-and-Fixtures'
+res = Webget.page( url )
+puts res.status.code       #=> 200
+puts res.status.message    #=> OK
+puts res.status.ok?
+
+puts
+puts "text:"
+puts res.text[0..200]
