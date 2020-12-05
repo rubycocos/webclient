@@ -59,3 +59,7 @@ puts res.status.ok?
 puts
 puts "text:"
 puts res.text[0..200]
+
+
+puts "bye"
+

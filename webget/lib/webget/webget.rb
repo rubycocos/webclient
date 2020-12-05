@@ -62,6 +62,30 @@ class Webget   # a web (go get) crawler
   end  # method self.page
 
 
+  def self.text( url, path: nil, headers: {} )  ## assumes txt format
+    puts "  sleep #{config.sleep} sec(s)..."
+    sleep( config.sleep )   ## slow down - sleep 3secs before each http request
+
+    response = Webclient.get( url, headers: headers )
+
+    if response.status.ok?  ## must be HTTP 200
+      puts "#{response.status.code} #{response.status.message}"
+      ## note: like json assumes always utf-8 encoding for now !!!
+      Webcache.record( url, response,
+                       path: path,   ## optional "custom" (file)path for saving in cache
+                       format: 'txt' )
+    else
+      ## todo/check - log error
+      puts "!! ERROR - #{response.status.code} #{response.status.message}:"
+      pp response.raw  ## note: dump inner (raw) response (NOT the wrapped)
+    end
+
+    ## to be done / continued
+    response
+  end  # method self.text
+
+
+
   ## todo/check: rename to csv or file or records or - why? why not?
   ## todo/check: rename encoding to html/http-like charset - why? why not?
   def self.dataset( url, encoding: 'UTF-8', headers: {} )  ## assumes csv format

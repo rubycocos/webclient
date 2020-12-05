@@ -54,8 +54,14 @@ module Webcache
  ### "interface" for "generic" cache storage (might be sqlite database or filesystem)
  def self.cache() @cache ||= DiskCache.new; end
 
- def self.record( url, response, encoding: 'UTF-8', format: 'html' )
-   cache.record( url, response, encoding: encoding, format: format );
+ def self.record( url, response,
+                   path: nil,
+                   encoding: 'UTF-8',
+                   format: 'html' )
+   cache.record( url, response,
+                   path: path,
+                   encoding: encoding,
+                   format: format );
  end
  def self.cached?( url ) cache.cached?( url ); end
  class << self
@@ -98,9 +104,12 @@ class DiskCache
 
   ## add more save / put / etc. aliases - why? why not?
   ##  rename to record_html - why? why not?
-  def record( url, response, encoding: 'UTF-8', format: 'html' )
+  def record( url, response,
+              path: nil,
+              encoding: 'UTF-8',
+              format: 'html' )
 
-    body_path = "#{Webcache.root}/#{url_to_path( url )}"
+    body_path = "#{Webcache.root}/#{url_to_path( url, path: path )}"
     meta_path = "#{body_path}.meta.txt"
 
     ## make sure path exits
@@ -115,9 +124,10 @@ class DiskCache
       File.open( body_path, 'w:utf-8' ) {|f| f.write( JSON.pretty_generate( response.json )) }
     elsif format == 'csv'
       ## fix: newlines - always use "unix" style" - why? why not?
+      ## fix:  use :newline => :universal option? translates to univeral "\n"
       text = response.text( encoding: encoding ).gsub( "\r\n", "\n" )
       File.open( body_path, 'w:utf-8' ) {|f| f.write( text ) }
-    else
+    else   ## html or txt
       text = response.text( encoding: encoding )
       File.open( body_path, 'w:utf-8' ) {|f| f.write( text ) }
     end
@@ -141,7 +151,7 @@ class DiskCache
 
 
   ### helpers
-  def url_to_path( str )
+  def url_to_path( str, path: nil )
     ## map url to file path
     uri = URI.parse( str )
 
@@ -150,10 +160,14 @@ class DiskCache
     ##    always downcase for now (internet domain is case insensitive)
     host_dir = uri.host.downcase
 
-    ## "/this/is/everything?query=params"
-    ##   cut-off leading slash and
-    ##    convert query ? =
-    req_path = uri.request_uri[1..-1]
+    req_path = if path   ## use "custom" (file)path for cache storage if passed in
+                 path
+               else
+                ## "/this/is/everything?query=params"
+                ##   cut-off leading slash and
+                ##    convert query ? =
+                 uri.request_uri[1..-1]
+               end
 
 
 
