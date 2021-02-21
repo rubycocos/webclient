@@ -212,6 +212,11 @@ class DiskCache
                          .gsub( '=', '~')
 
       req_path = "#{req_path}.json"
+    elsif host_dir.index( 'api.cryptokitties.co' )
+      ## for now always auto-add .json extensions e.g.
+      ##     kitties/1   => kitties/1.json
+      ##     cattributes => cattributes.json
+      req_path = "#{req_path}.json"
     else
       ## no special rule
     end
