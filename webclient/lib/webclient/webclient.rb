@@ -113,5 +113,58 @@ def self.get( url, headers: {}, auth: [] )
   Response.new( response )
 end  # method self.get
 
+
+def self.post( url, headers: {},
+                    body: nil,
+                    json: nil   ## json - convenience shortcut (for body & encoding)
+              )
+
+  uri = URI.parse( url )
+  http = Net::HTTP.new( uri.host, uri.port )
+
+  if uri.instance_of? URI::HTTPS
+    http.use_ssl     = true
+    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+  end
+
+  request = Net::HTTP::Post.new( uri.request_uri )
+
+  ### add (custom) headers if any
+  ##  check/todo: is there are more idiomatic way for Net::HTTP ???
+  ##   use
+  ##     request = Net::HTTP::Get.new( uri.request_uri, headers )
+  ##    why? why not?
+  ##  instead of e.g.
+  ##   request['X-Auth-Token'] = 'xxxxxxx'
+  ##   request['User-Agent']   = 'ruby'
+  ##   request['Accept']       = '*/*'
+  if headers && headers.size > 0
+    headers.each do |key,value|
+      request[ key ] = value
+    end
+  end
+
+  if body
+     request.body = body.to_s
+  end
+
+  if json
+     # note: the body needs to be a JSON string - use pretty generate and NOT "compact" style - why? why not?
+     request.body = JSON.pretty_generate( json )
+
+     ## move (auto-set) header content-type up (before custom headers) - why? why not?
+     request['Content-Type'] = 'application/json'
+  end
+
+
+  puts "POST #{uri}..."
+
+  response = http.request( request )
+
+  ## note: return "unified" wrapped response
+  Response.new( response )
+end  # method self.post
+
+
 end  # class Webclient
 

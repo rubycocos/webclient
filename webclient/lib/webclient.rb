@@ -22,4 +22,4 @@ WebClient = Webclient
 
 
 # say hello
-puts Webclient.banner    if defined?( $RUBYLIBS_DEBUG )
+puts Webclient.banner     ## if defined?( $RUBYLIBS_DEBUG )
