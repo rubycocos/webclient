@@ -2,6 +2,8 @@
 
 ## More Cache Gems (to checkout)
 
+- <https://github.com/gurgeous/httpdisk>
+
 - <https://github.com/DannyBen/webcache> - hassle-free caching for HTTP download
 - <https://github.com/DannyBen/lightly> -  a file cache for performing heavy tasks, lightly
 
@@ -9,6 +11,10 @@
 - <https://github.com/dannguyen/active_scraper>
 - <https://github.com/vcr/vcr>
 
+
+## More Web Crawler Gems (to checkout)
+
+- <https://github.com/gurgeous/sinew> - a ruby DSL for structured web crawling, with a robust caching system
 
 
 ## Web Crawler / Spider / Scraper Names
