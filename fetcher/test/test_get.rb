@@ -40,4 +40,16 @@ class TestGet < MiniTest::Test
     assert_equal '404', res.code
   end
 
+  def test_get_cookie_redirect
+    url = 'https://link.springer.com/search.rss?search-within=Journal&facet-journal-id=10827'
+    worker = Fetcher::Worker.new
+    res = worker.get( url )
+    pp res
+
+    assert_equal '200',        res.code             # note: returned code is a string e.g. '200' not 200
+    assert_equal 'OK',         res.message
+    assert_equal 'text/xml', res.content_type
+
+  end
+
 end # class TestGet
