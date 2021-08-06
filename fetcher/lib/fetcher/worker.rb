@@ -154,6 +154,7 @@ module Fetcher
 
       redirect_limit = 6
       response = nil
+      cookie_jar = nil
 
       until false
         raise ArgumentError, 'HTTP redirect too deep' if redirect_limit == 0
@@ -164,6 +165,7 @@ module Fetcher
         logger.debug "GET #{uri.request_uri} uri=#{uri}, redirect_limit=#{redirect_limit}"
 
         headers = { 'User-Agent' => "fetcher gem v#{VERSION}" }
+        headers['Cookie'] = cookie_jar unless cookie_jar.nil?
 
         if use_cache?
           ## check for existing cache entry in cache store (lookup by uri)
@@ -214,6 +216,17 @@ module Fetcher
             newuri = uri + response.header['location']
           end
           uri = newuri
+
+          cookie = response.get_fields('set-cookie')
+          if cookie.respond_to?('each')
+            cookies_array = Array.new
+            cookie.each { | cookie |
+              cookies_array.push(cookie.split('; ')[0])
+            }
+            cookie_jar = cookies_array.join('; ')
+          end
+
+          logger.debug "Set cookie: #{cookie_jar}"
         else
           puts "*** error - fetch HTTP - #{response.code} #{response.message}"
           break  # will return response
