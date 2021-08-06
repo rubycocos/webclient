@@ -217,16 +217,13 @@ module Fetcher
           end
           uri = newuri
 
-          cookie_response = response['Set-Cookie']
-
-          if cookie_response.respond_to?('each')
+          cookie = response.get_fields('set-cookie')
+          if cookie.respond_to?('each')
             cookies_array = Array.new
             cookie.each { | cookie |
               cookies_array.push(cookie.split('; ')[0])
             }
             cookie_jar = cookies_array.join('; ')
-          else
-            cookie_jar = cookie_response
           end
 
           logger.debug "Set cookie: #{cookie_jar}"
