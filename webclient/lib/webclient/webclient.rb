@@ -42,6 +42,10 @@ class Webclient
     def json() JSON.parse( text ); end
 
 
+    def body() @response.body.to_s; end
+    alias_method :blob, :body
+
+
 
     class Headers # nested (nested) class
       def initialize( response )
@@ -54,6 +58,34 @@ class Webclient
       end
     end
     def headers() @headers ||= Headers.new( @response ); end
+
+
+    ## add some predefined/built-in header(s) convenience shortcuts
+    def content_type
+      ## check: change to headers['content-type'] or such - why? why not?
+      @response.content_type
+    end
+    def content_length
+      @response.content_length
+    end
+
+    def image_jpg?
+      content_type =~ %r{image/jpeg}i
+    end
+    def image_png?
+      content_type =~ %r{image/png}i
+    end
+    def image_gif?
+      content_type =~ %r{image/gif}i
+    end
+
+    alias_method :image_jpeg?, :image_jpg?
+    alias_method :jpeg?, :image_jpg?
+    alias_method :jpg?, :image_jpg?
+    alias_method :png?, :image_png?
+    alias_method :gif?, :image_gif?
+
+
 
     class Status  # nested (nested) class
       def initialize( response )
