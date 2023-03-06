@@ -147,7 +147,9 @@ end  # method self.get
 
 
 def self.post( url, headers: {},
+                    auth: [],
                     body: nil,
+                    form: nil,
                     json: nil   ## json - convenience shortcut (for body & encoding)
               )
 
@@ -176,8 +178,28 @@ def self.post( url, headers: {},
     end
   end
 
+  if auth.size == 2   ## e.g. ['user', 'password']
+    ## always assume basic auth for now
+    ##  auth[0]  => user
+    ##  auth[1]  => password
+    request.basic_auth( auth[0], auth[1] )
+    puts "  using basic auth - user: #{auth[0]}, password: ***"
+  end
+
+
   if body
      request.body = body.to_s
+  end
+
+  if form
+     ## todo/fix: urlencode key/values!!!!!
+     form_urlencoded = form.map do |k,v|
+                                     "#{k}=#{v}"
+                                 end.join( '&' )
+
+     request.body = form_urlencoded
+
+    request['Content-Type'] = 'application/x-www-form-urlencoded'
   end
 
   if json
