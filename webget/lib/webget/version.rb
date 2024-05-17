@@ -12,12 +12,11 @@ class Webget
 
   # version string for generator meta tag (includes ruby version)
   def self.banner
-    "webget/#{VERSION} on Ruby #{RUBY_VERSION} (#{RUBY_RELEASE_DATE}) [#{RUBY_PLATFORM}]"
+    "webget/#{VERSION} on Ruby #{RUBY_VERSION} (#{RUBY_RELEASE_DATE}) [#{RUBY_PLATFORM}] in (#{root})"
   end
 
   def self.root
     "#{File.expand_path( File.dirname(File.dirname(File.dirname(__FILE__))) )}"
   end
-
 end  # module Webget
 

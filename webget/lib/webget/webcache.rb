@@ -201,7 +201,7 @@ class DiskCache
       req_path = req_path.sub( 'mmz4281/', '' )  # shorten - cut off mmz4281/
       req_path = req_path.sub( 'new/', '' )      # shorten - cut off new/
     elsif host_dir.index( 'football-data.org' )
-      req_path = req_path.sub( 'v2/', '' )  # shorten - cut off v2/
+      ##  req_path = req_path.sub( 'v2/', '' )  # shorten - cut off v2/
 
       ## flattern - make a file path - for auto-save
       ##   change ? to -I-
