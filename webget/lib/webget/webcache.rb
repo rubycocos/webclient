@@ -125,8 +125,7 @@ class DiskCache
     ## fix: newlines - always use "unix" style" - why? why not?
     ## fix:  use :newline => :universal option? translates to univeral "\n"
     if format == 'json'
-      text = response.text( encoding: encoding ).gsub( "\r\n", "\n" )
-      File.open( body_path, 'w:utf-8' ) {|f| f.write( JSON.pretty_generate( text )) }
+      File.open( body_path, 'w:utf-8' ) {|f| f.write( JSON.pretty_generate( response.json )) }
     elsif format == 'csv'
       ## fix: newlines - always use "unix" style" - why? why not?
       ## fix:  use :newline => :universal option? translates to univeral "\n"
