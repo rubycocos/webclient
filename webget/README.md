@@ -6,7 +6,6 @@ webget gem - a web (go get) crawler incl. web cache
 * bugs  :: [github.com/rubycoco/webclient/issues](https://github.com/rubycoco/webclient/issues)
 * gem   :: [rubygems.org/gems/webget](https://rubygems.org/gems/webget)
 * rdoc  :: [rubydoc.info/gems/webget](http://rubydoc.info/gems/webget)
-* forum :: [groups.google.com/group/wwwmake](https://groups.google.com/group/wwwmake)
 
 
 ## Usage

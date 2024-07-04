@@ -47,6 +47,7 @@ module Webcache
 
 
  ## add "high level" root convenience helpers
+ ##   use delegate helper - why? why not?
  def self.root()       config.root; end
  def self.root=(value) config.root = value; end
 
@@ -120,15 +121,19 @@ class DiskCache
 
     ## todo/check: verify content-type - why? why not?
     ## note - for now respone.text always assume (converted) to utf8!!!!!!!!!
+    ##
+    ## fix: newlines - always use "unix" style" - why? why not?
+    ## fix:  use :newline => :universal option? translates to univeral "\n"
     if format == 'json'
-      File.open( body_path, 'w:utf-8' ) {|f| f.write( JSON.pretty_generate( response.json )) }
+      text = response.text( encoding: encoding ).gsub( "\r\n", "\n" )
+      File.open( body_path, 'w:utf-8' ) {|f| f.write( JSON.pretty_generate( text )) }
     elsif format == 'csv'
       ## fix: newlines - always use "unix" style" - why? why not?
       ## fix:  use :newline => :universal option? translates to univeral "\n"
       text = response.text( encoding: encoding ).gsub( "\r\n", "\n" )
       File.open( body_path, 'w:utf-8' ) {|f| f.write( text ) }
     else   ## html or txt
-      text = response.text( encoding: encoding )
+      text = response.text( encoding: encoding ).gsub( "\r\n", "\n" )
       File.open( body_path, 'w:utf-8' ) {|f| f.write( text ) }
     end
 

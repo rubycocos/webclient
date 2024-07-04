@@ -11,7 +11,7 @@ Hoe.spec 'webget' do
   self.urls    = { home: 'https://github.com/rubycoco/webclient' }
 
   self.author  = 'Gerald Bauer'
-  self.email   = 'ruby-talk@ruby-lang.org'
+  self.email   = 'gerald.bauer@gmail.com'
 
   # switch extension to .markdown for gihub formatting
   self.readme_file  = 'README.md'
@@ -20,6 +20,7 @@ Hoe.spec 'webget' do
   self.extra_deps = [
     ['webclient', '>= 0.2.0'],
     ['csvreader', '>= 1.2.4'],
+    ['cocos'],
   ]
 
   self.licenses = ['Public Domain']

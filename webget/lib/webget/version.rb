@@ -1,9 +1,8 @@
 
 class Webget
-
   MAJOR = 0    ## todo: namespace inside version or something - why? why not??
-  MINOR = 2
-  PATCH = 5
+  MINOR = 3
+  PATCH = 0
   VERSION = [MAJOR,MINOR,PATCH].join('.')
 
   def self.version
@@ -16,7 +15,7 @@ class Webget
   end
 
   def self.root
-    "#{File.expand_path( File.dirname(File.dirname(File.dirname(__FILE__))) )}"
+    File.expand_path( File.dirname(File.dirname(File.dirname(__FILE__))) )
   end
 end  # module Webget
 
