@@ -177,7 +177,17 @@ class DiskCache
 
     ### special "prettify" rule for weltfussball
     ##   /eng-league-one-2019-2020/  => /eng-league-one-2019-2020.html
-    if host_dir.index( 'weltfussball.de' ) ||
+
+### todo/fix - move rules downstream to user - why? why not?
+
+    if host_dir.index( 'uefa.com' )
+      if req_path.end_with?( '/' )
+        req_path = "#{req_path[0..-2]}.html"
+      else
+        puts "ERROR: expected request_uri for >#{host_dir}< ending with '/'; got: >#{req_path}<"
+        exit 1
+      end  
+    elsif host_dir.index( 'weltfussball.de' ) ||
        host_dir.index( 'worldfootball.net' )
           if req_path.end_with?( '/' )
              req_path = "#{req_path[0..-2]}.html"
