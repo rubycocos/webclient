@@ -180,7 +180,9 @@ class DiskCache
 
 ### todo/fix - move rules downstream to user - why? why not?
 
-    if host_dir.index( 'uefa.com' )
+    if host_dir.index( 'uefa.com' ) ||
+       host_dir.index( 'kicker.de' ) ||
+       host_dir.index( 'kicekr.at' )
       if req_path.end_with?( '/' )
         req_path = "#{req_path[0..-2]}.html"
       else
