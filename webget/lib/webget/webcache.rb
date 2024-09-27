@@ -2,6 +2,69 @@
 
 module Webcache
 
+
+  class Headers # nested class for convenience access to (meta) headers
+
+    def self.parse( txt )
+      data = {}
+      txt.each_line do |line|
+         line = line.strip
+         next  if line.empty? || line.start_with?( '#' )
+
+         key, value = line.split( ':', 2 )  ## split on first colon
+         ## always downcase keys for now
+         ##  and strip value from leading and trailing spaces
+         ##
+         ##  todo/fix: deal with possible duplicate header keys!!
+         ##   if duplicate do NOT replease, add with leading ", " comma-separated!!!
+         ##
+         ##  check if multi-line headers are possible!!!
+         data[ key.strip.downcase ] = value.strip
+      end
+      new( data )
+    end
+
+
+
+    def initialize( data )
+      @data = data
+    end
+
+    def to_h() @data; end
+    def [](key) @data[key];; end
+
+    def each( &blk )
+      @data.each do |key, value|
+        blk.call( key, value )
+      end
+    end
+
+
+    def date
+       ## return date header
+       ##  parses the time as RFC 1123 date of HTTP-date defined by RFC 2616:
+       ##    day-of-week, DD month-name CCYY hh:mm:ss GMT
+       ##   !!! Note that the result is always UTC (GMT). !!!
+       ##   e.g. Sun, 19 May 2024 15:15:34 GMT
+       ##        Mon, 10 Jun 2024 15:58:16 GMT
+       @date ||= Time.httpdate( @data['date'] )
+       @date
+    end
+
+    ## default to 12h (60secs*60min*12h)
+    def expired?( expires_in_date=Time.now.utc-60*60*12 )
+      ## pp expires_in_date
+      expires_in_date > date
+    end
+
+    ## add convenience helpers - why? why not?
+    def expired_in_12h?() expired?( Time.now.utc-60*60*12 ); end
+    def expired_in_24h?() expired?( Time.now.utc-60*60*24 ); end
+    alias_method :expired_in_1d?, :expired_in_24h?
+  end # class Headers
+
+
+
   #####
   # copied from props gem, see Env.home
   #    - https://github.com/rubycoco/props/blob/master/props/lib/props/env.rb
@@ -73,6 +136,26 @@ module Webcache
  def self.read_json( url )  cache.read_json( url ); end
  def self.read_csv( url )   cache.read_csv( url );  end
 
+#### new - read (cached) meta data
+##    todo/check - find a better/different name - why? why not?
+##       e.g. read_headers or simply meta or headers or such
+  def self.read_meta( url ) cache.read_meta( url ); end
+
+  ## add convenience expire (shortcut) helpers
+  def self.expired?( url, expires_in: Time.now.utc-60*60*12 )
+     if cached?( url )
+       meta = read_meta( url )
+       meta.expired?( expires_in )
+     else
+       true  # note - not in cache; expired by default
+     end
+  end
+  def self.expired_in_12h?( url ) expired?( url, expires_in: Time.now.utc-60*60*12 ); end
+  def self.expired_in_24h?( url ) expired?( url, expires_in: Time.now.utc-60*60*24 ); end
+  class << self
+    alias_method :expired_in_1d?, :expired_in_24h?
+  end
+
 
 
 class DiskCache
@@ -99,6 +182,15 @@ class DiskCache
     body_path = "#{Webcache.root}/#{url_to_path( url )}"
     txt = File.open( body_path, 'r:utf-8' ) {|f| f.read }
     data = CsvHash.parse( txt )
+    data
+  end
+
+
+  def read_meta( url )
+    body_path = "#{Webcache.root}/#{url_to_path( url )}"
+    meta_path = "#{body_path}.meta.txt"
+    txt = File.open( meta_path, 'r:utf-8' ) {|f| f.read }
+    data = Headers.parse( txt )
     data
   end
 
@@ -188,7 +280,7 @@ class DiskCache
       else
         puts "ERROR: expected request_uri for >#{host_dir}< ending with '/'; got: >#{req_path}<"
         exit 1
-      end  
+      end
     elsif host_dir.index( 'weltfussball.de' ) ||
        host_dir.index( 'worldfootball.net' )
           if req_path.end_with?( '/' )

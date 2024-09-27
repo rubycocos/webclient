@@ -16,3 +16,7 @@ cache/
 # ignore all databases
 *.db
 
+
+###
+# ignore local cache for testing
+cache/

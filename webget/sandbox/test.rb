@@ -8,10 +8,10 @@ puts Webcache.home   ## built-in helper for checking home directory
 puts Webcache.root
 puts Webcache.config.root
 
-# Webcache.root = './cache'
-#
-# puts Webcache.root
-# puts Webcache.config.root
+Webcache.root = './cache'
+
+puts Webcache.root
+puts Webcache.config.root
 
 
 
@@ -36,6 +36,26 @@ puts Webcache.cached?( url )
 
 puts Webcache.exist?( 'http://foo.com/bar' )
 puts Webcache.cached?( 'http://foo.com/bar' )
+
+meta = Webcache.read_meta( url )
+pp meta
+pp meta.to_h
+pp meta.date
+pp meta['date']
+pp Time.now
+pp Time.now.utc
+
+pp meta.expired?
+pp meta.expired?( Time.now.utc+60*60 )   ## 1h in future (always expired)
+
+pp Webcache.expired?( 'http://foo.com/bar' )
+pp Webcache.expired?( 'http://foo.com/bar', expires_in: Time.now.utc+60*60 )
+pp Webcache.expired_in_12h?( 'http://foo.com/bar' )
+pp Webcache.expired_in_24h?( 'http://foo.com/bar' )
+pp Webcache.expired_in_1d?( 'http://foo.com/bar' )
+
+pp Webcache.expired?( url )
+pp Webcache.expired?( url, expires_in: Time.now.utc+60*60 )
 
 
 
