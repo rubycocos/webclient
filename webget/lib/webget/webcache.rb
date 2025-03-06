@@ -274,7 +274,7 @@ class DiskCache
 
     if host_dir.index( 'uefa.com' ) ||
        host_dir.index( 'kicker.de' ) ||
-       host_dir.index( 'kicekr.at' )
+       host_dir.index( 'kicker.at' )
       if req_path.end_with?( '/' )
         req_path = "#{req_path[0..-2]}.html"
       else
@@ -317,6 +317,12 @@ class DiskCache
       ##   change = to ~
       req_path = req_path.gsub( '?', '-I-' )
                          .gsub( '/', '~~' )
+                         .gsub( '=', '~')
+
+      req_path = "#{req_path}.json"
+    elsif host_dir.index( 'api-sports.io' )
+      req_path = req_path.gsub( '?', '-I-' )
+                         .gsub( '&', '~~' )   ### check if & present?
                          .gsub( '=', '~')
 
       req_path = "#{req_path}.json"
