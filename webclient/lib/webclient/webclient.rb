@@ -14,29 +14,78 @@ class Webclient
       # will be set to ASCII-8BIT == BINARY == Encoding Unknown; Raw Bytes Here
       # thus, set/force encoding to utf-8
       text = @response.body.to_s
+
+      ###
+      ##  note
+      ## auto-check for unicode byte-order marks (BOM)s!!
+      ##   and auto-strip bom!!
+      encoding_bom =
+      if text.start_with?("\x00\x00\xFE\xFF".b)
+         text = text.byteslice(4..)
+         "UTF-32BE"
+      elsif text.start_with?("\xFF\xFE\x00\x00".b)
+         text = text.byteslice(4..)
+         "UTF-32LE"
+      elsif text.start_with?("\xFE\xFF".b)
+         text = text.byteslice(2..)
+         "UTF-16BE"
+      elsif text.start_with?("\xFF\xFE".b)
+         text = text.byteslice(2..)
+         "UTF-16LE"
+      elsif text.start_with?("\xEF\xBB\xBF".b)
+         text = text.byteslice(3..)
+         "UTF-8"
+      else
+         nil   # no bom found
+      end
+
+
+      if encoding_bom
+        puts "  [debug] auto-removing unicode >#{encoding_bom}< encoding bom (magic bytes) in response.text"
+
+        if encoding_bom.downcase != encoding.downcase
+          puts "  [debug] !!! auto-fixing response.text encoding; >#{encoding}< overridden by >#{encoding_bom}< unicode encoding bom"
+          encoding = encoding_bom
+        end
+      end
+
+
       if encoding.downcase == 'utf-8'
          text = text.force_encoding( Encoding::UTF_8 )
       else
-    ## [debug] GET=http://www.football-data.co.uk/mmz4281/0405/SC0.csv
-    ##    Encoding::UndefinedConversionError: "\xA0" from ASCII-8BIT to UTF-8
-    ##     note:  0xA0 (160) is NBSP (non-breaking space) in Windows-1252
+        ## [debug] GET=http://www.football-data.co.uk/mmz4281/0405/SC0.csv
+        ##    Encoding::UndefinedConversionError: "\xA0" from ASCII-8BIT to UTF-8
+        ##     note:  0xA0 (160) is NBSP (non-breaking space) in Windows-1252
 
-    ## note: assume windows encoding (for football-data.uk)
-    ##   use "Windows-1252" for input and convert to utf-8
-    ##
-    ##    see https://www.justinweiss.com/articles/3-steps-to-fix-encoding-problems-in-ruby/
-    ##    see https://en.wikipedia.org/wiki/Windows-1252
-    ## txt = txt.force_encoding( 'Windows-1252' )
-    ## txt = txt.encode( 'UTF-8' )
-    ##   Encoding::UTF_8 => 'UTF-8'
-        puts " [debug] converting response.text encoding from >#{encoding}< to >UTF-8<"
+       ## note: assume windows encoding (for football-data.uk)
+       ##   use "Windows-1252" for input and convert to utf-8
+       ##
+       ##    see https://www.justinweiss.com/articles/3-steps-to-fix-encoding-problems-in-ruby/
+       ##    see https://en.wikipedia.org/wiki/Windows-1252
+       ## txt = txt.force_encoding( 'Windows-1252' )
+       ## txt = txt.encode( 'UTF-8' )
+       ##   Encoding::UTF_8 => 'UTF-8'
+          puts "  [debug] try converting response.text encoding from >#{encoding}< to >UTF-8<"
+          text = text.force_encoding( encoding )
+          text = text.encode( Encoding::UTF_8 )
 
-        text = text.force_encoding( encoding )
-        text = text.encode( Encoding::UTF_8 )
+=begin
+
+  ## maybe be more tolerant when converting? why? why not?
+
+text = text.encode(
+    Encoding::UTF_8,
+    invalid: :replace,
+    undef:   :replace,
+    replace: "�"
+  )
+=end
+
       end
 
       text
     end
+
 
     ## convenience helper; returns parsed json data; note: always assume utf-8 (text) encoding
     def json() JSON.parse( text ); end
@@ -221,4 +270,3 @@ end  # method self.post
 
 
 end  # class Webclient
-
