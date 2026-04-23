@@ -15,6 +15,18 @@ class Webclient
       # thus, set/force encoding to utf-8
       text = @response.body.to_s
 
+      ##
+      ## todo/assert
+      ##   make sure encoding is  ASCII-8BIT == BINARY !!!
+
+      ## note !!!! - make sure text is always a copy
+      ##              NOT a reference to @response.body.to_s
+      ##                otherwise force_encoding
+      ##                    will change the encoding "upstream"
+      text = text.dup
+
+
+
       ###
       ##  note
       ## auto-check for unicode byte-order marks (BOM)s!!
@@ -44,13 +56,15 @@ class Webclient
         puts "  [debug] auto-removing unicode >#{encoding_bom}< encoding bom (magic bytes) in response.text"
 
         if encoding_bom.downcase != encoding.downcase
-          puts "  [debug] !!! auto-fixing response.text encoding; >#{encoding}< overridden by >#{encoding_bom}< unicode encoding bom"
+          puts "  [debug] !!! WARN - auto-fixing response.text encoding; >#{encoding}< overridden by >#{encoding_bom}< unicode encoding bom"
           encoding = encoding_bom
         end
       end
 
 
       if encoding.downcase == 'utf-8'
+         ## note - get a duplicate
+         ##           otherwise
          text = text.force_encoding( Encoding::UTF_8 )
       else
         ## [debug] GET=http://www.football-data.co.uk/mmz4281/0405/SC0.csv
@@ -67,20 +81,24 @@ class Webclient
        ##   Encoding::UTF_8 => 'UTF-8'
           puts "  [debug] try converting response.text encoding from >#{encoding}< to >UTF-8<"
           text = text.force_encoding( encoding )
-          text = text.encode( Encoding::UTF_8 )
 
-=begin
+          replace = true
+          if replace
+                ## maybe be more tolerant when converting? why? why not?
+             text = text.encode(
+                      Encoding::UTF_8,
+                         invalid: :replace,
+                         undef:   :replace,
+                         replace: "�"
+                      )
 
-  ## maybe be more tolerant when converting? why? why not?
-
-text = text.encode(
-    Encoding::UTF_8,
-    invalid: :replace,
-    undef:   :replace,
-    replace: "�"
-  )
-=end
-
+               errors = text.scan( "�" )
+               if errors.size > 0
+                  puts "  [debug] !!! WARN - #{errors.size} invalid/undef character encoding error(s) replaced w/ �"
+               end
+          else
+            text = text.encode( Encoding::UTF_8 )
+          end
       end
 
       text
