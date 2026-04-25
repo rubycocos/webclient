@@ -8,6 +8,17 @@ class Webclient
     def raw() @response; end
 
 
+
+
+    ### internal helper
+    ###    to get "upstream" encoding
+    ###         note - unicode bom will override user encoding !!!
+
+    def _text_encoding_bom() defined?( @_text_encoding_bom ) ?  @_text_encoding_bom : nil; end
+    ## use _text_encoding_upstream or such - why? why not?
+    def _text_encoding()    defined?( @_text_encoding ) ?  @_text_encoding : nil;  end
+
+
     ## todo/check: rename encoding to html/http-like charset - why? why not?
     def text( encoding: 'UTF-8' )
       # note: Net::HTTP will NOT set encoding UTF-8 etc.
@@ -26,11 +37,18 @@ class Webclient
       text = text.dup
 
 
-
       ###
       ##  note
       ## auto-check for unicode byte-order marks (BOM)s!!
       ##   and auto-strip bom!!
+      ##
+      ##  common BOMs to check
+      ##   UTF-8: EF BB BF
+      ##   UTF-16 BE: FE FF
+      ##   UTF-16 LE: FF FE
+      ##   UTF-32 BE: 00 00 FE FF
+      ##   UTF-32 LE: FF FE 00 00
+
       encoding_bom =
       if text.start_with?("\x00\x00\xFE\xFF".b)
          text = text.byteslice(4..)
@@ -60,6 +78,13 @@ class Webclient
           encoding = encoding_bom
         end
       end
+
+##
+##    note - allow "hack-y" access to "upstream" encoding used before conversion to utf-8
+##             e.g. use   response._text_encoding_bom or
+##                        response._text_encoding
+          @_text_encoding_bom = encoding_bom
+          @_text_encoding     = encoding
 
 
       if encoding.downcase == 'utf-8'
