@@ -127,6 +127,7 @@ module Webcache
                    encoding: encoding,
                    format: format );
  end
+
  def self.cached?( url ) cache.cached?( url ); end
  class << self
    alias_method :exist?, :cached?
@@ -161,7 +162,25 @@ module Webcache
 class DiskCache
   def cached?( url )
     body_path = "#{Webcache.root}/#{url_to_path( url )}"
-    File.exist?( body_path )
+    exist =  File.exist?( body_path )
+
+=begin
+##  not really working - check back later
+###   The catch on Windows
+##   On Windows, File.realpath does NOT normalize casing to the on-disk canonical case.
+##
+## note - on windows - file.exist? is case-insensitive
+##         use the strict: true flag if you want to enforce case-sensitive exists checks on windows!!!
+##   On Windows, File.realpath returns the "true" path
+##    as stored on the disk with the correct casing.
+##    If the path you provide doesn't match the casing of the real path,
+##     you know the match was case-insensitive.
+    if exist && strict
+     exist =  File.realpath(body_path) == File.expand_path(body_path)
+    end
+=end
+
+    exist
   end
   alias_method :exist?, :cached?
 
@@ -249,7 +268,7 @@ class DiskCache
   ### helpers
   def url_to_path( str, path: nil )
     ## map url to file path
-    uri = URI.parse( str )
+    uri = URI( str )       ## URI() same as URI.parse()
 
     ## note: ignore scheme (e.g. http/https)
     ##         and  post  (e.g. 80, 8080, etc.) for now
