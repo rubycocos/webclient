@@ -1,6 +1,34 @@
 # Notes
 
 
+- [ ] maybe check for html
+       inside text for meta charset???
+      or check content-type  -- why? why not?
+
+```
+# 1. Get raw binary data so Ruby doesn't guess the encoding yet
+  raw_body = response.body.b
+
+  # 2. Determine source encoding (Check Content-Type header first)
+  content_type = response['content-type'] || ''
+  source_encoding = 'ISO-8859-1' # Default fallback for legacy sites like RSSSF
+
+  if content_type.include?('charset=')
+    source_encoding = content_type.split('charset=').last.strip
+  elsif raw_body =~ /<meta.*charset=["']?([^"' >]+)/i
+    # Fallback: scan the raw HTML text for a meta charset tag
+    source_encoding = $1
+  end
+
+  # 3. Handle specific vendor encodings gracefully
+  source_encoding = 'CP1252' if source_encoding.upcase == 'ISO-8859-1'
+
+```
+
+
+
+
+
 - [ ] add custom headers
 
 

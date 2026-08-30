@@ -32,6 +32,10 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
 
 
 
+  ### fix-fix-fix
+  ##    change to read_txt/read_text/read_html
+  ##  plus add
+  ##     read_blob/read_bin !!!
   def read( url )
     body_path = "#{Webcache.root}/#{url_to_path( url )}"
     File.open( body_path, 'r:utf-8' ) {|f| f.read }
@@ -94,8 +98,10 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
     ## fix:  use :newline => :universal option? translates to univeral "\n"
     if format == 'json'
       File.open( body_path, 'w:utf-8' ) {|f| f.write( JSON.pretty_generate( response.json )) }
-      x_encoding_bom = nil
-      x_encoding     = nil   ## for now do not track; always assume  UTF-8
+      x_encoding_bom   = nil
+      x_encoding       = nil   ## for now do not track; always assume  UTF-8
+      x_encoding_valid = nil
+      x_ascii_only     = nil
     elsif format == 'csv'
       ## fix: newlines - always use "unix" style" - why? why not?
       ## fix:  use :newline => :universal option? translates to univeral "\n"
@@ -103,15 +109,19 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
       File.open( body_path, 'w:utf-8' ) {|f| f.write( text ) }
 
       ### note - bom if different will overwrite (user) encoding!!!
-      x_encoding_bom  = response._text_encoding_bom
-      x_encoding      = response._text_encoding
+      x_encoding_bom   = response._text_encoding_bom
+      x_encoding       = response._text_encoding
+      x_encoding_valid = response._text_encoding_valid  # true|false or nil (undef)
+      x_ascii_only     = response._text_ascii_only
     else   ## html or txt
       text          = response.text( encoding: encoding ).gsub( "\r\n", "\n" )
       File.open( body_path, 'w:utf-8' ) {|f| f.write( text ) }
 
       ### note - bom if different will overwrite (user) encoding!!!
-      x_encoding_bom  = response._text_encoding_bom
-      x_encoding      = response._text_encoding
+      x_encoding_bom   = response._text_encoding_bom
+      x_encoding       = response._text_encoding
+      x_encoding_valid = response._text_encoding_valid  # true|false or nil (undef)
+      x_ascii_only     = response._text_ascii_only
     end
 
 
@@ -129,12 +139,15 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
 
       #### add our own custom headers first!!
       ##   change x-save to x-filename or ??
+      ##   use x-7bit-only or x-ascii7bit or x-ascii7bit-only or ??
       ##
       ## todo - add x-size for actual bytesize of saved file - why? why not??
 
       f.write( "x-url: #{url}\n" )
-      f.write( "x-encoding-bom: #{x_encoding_bom}\n" )  if x_encoding_bom
-      f.write( "x-encoding: #{x_encoding}\n" )          if x_encoding
+      f.write( "x-encoding-bom: #{x_encoding_bom}\n" )      if x_encoding_bom
+      f.write( "x-encoding: #{x_encoding}\n" )              if x_encoding
+      f.write( "x-encoding-valid: #{x_encoding_valid}\n" )  if x_encoding_valid
+      f.write( "x-ascii-only: #{x_ascii_only}\n" )          if x_ascii_only
       f.write( "x-save: #{save_path}\n" )
       f.write( "x-format: #{format}\n" )     ## e.g. json|html|csv|etc.
       f.write( "\n" )
@@ -168,81 +181,12 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
     req_path = if path   ## use "custom" (file)path for cache storage if passed in
                  path
                else
-                ## "/this/is/everything?query=params"
-                ##   cut-off leading slash and
-                ##    convert query ? =
-                 uri.request_uri[1..-1]
+                 ## "/this/is/everything?query=params"
+                 ##   cut-off leading slash and
+                 ##    convert query ? =
+                 rewrite_path( host_dir, uri.request_uri[1..-1] )
                end
 
-
-
-    ### special "prettify" rule for weltfussball
-    ##   /eng-league-one-2019-2020/  => /eng-league-one-2019-2020.html
-
-### todo/fix - move rules downstream to user - why? why not?
-
-    if host_dir.index( 'uefa.com' ) ||
-       host_dir.index( 'kicker.de' ) ||
-       host_dir.index( 'kicker.at' )
-      if req_path.end_with?( '/' )
-        req_path = "#{req_path[0..-2]}.html"
-      else
-        puts "ERROR: expected request_uri for >#{host_dir}< ending with '/'; got: >#{req_path}<"
-        exit 1
-      end
-    elsif host_dir.index( 'weltfussball.de' ) ||
-       host_dir.index( 'worldfootball.net' )
-          if req_path.end_with?( '/' )
-             req_path = "#{req_path[0..-2]}.html"
-          else
-            puts "ERROR: expected request_uri for >#{host_dir}< ending with '/'; got: >#{req_path}<"
-            exit 1
-          end
-    elsif host_dir.index( 'tipp3.at' )
-      req_path = req_path.sub( '.jsp', '' )  # shorten - cut off .jsp extension
-
-      ##   change ? to -I-
-      ##   change = to ~
-      ##   Example:
-      ##   sportwetten/classicresults.jsp?oddsetProgramID=888
-      ##     =>
-      ##   sportwetten/classicresults-I-oddsetProgramID~888
-      req_path = req_path.gsub( '?', '-I-' )
-                         .gsub( '=', '~')
-
-      req_path = "#{req_path}.html"
-    elsif host_dir.index( 'fbref.com' )
-      req_path = req_path.sub( 'en/', '' )      # shorten - cut off en/
-      req_path = "#{req_path}.html"             # auto-add html extension
-    elsif host_dir.index( 'football-data.co.uk' )
-      req_path = req_path.sub( 'mmz4281/', '' )  # shorten - cut off mmz4281/
-      req_path = req_path.sub( 'new/', '' )      # shorten - cut off new/
-    elsif host_dir.index( 'football-data.org' )
-      ##  req_path = req_path.sub( 'v2/', '' )  # shorten - cut off v2/
-
-      ## flattern - make a file path - for auto-save
-      ##   change ? to -I-
-      ##   change / to ~~
-      ##   change = to ~
-      req_path = req_path.gsub( '?', '-I-' )
-                         .gsub( '/', '~~' )
-                         .gsub( '=', '~')
-
-      req_path = "#{req_path}.json"
-    elsif host_dir.index( 'api-sports.io' )
-      req_path = req_path.gsub( '?', '-I-' )
-                         .gsub( '&', '~~' )   ### check if & present?
-                         .gsub( '=', '~')
-
-      req_path = "#{req_path}.json"
-    elsif host_dir.index( 'api.cryptokitties.co' )
-      ## for now always auto-add .json extensions e.g.
-      ##     kitties/1   => kitties/1.json
-      ##     cattributes => cattributes.json
-      req_path = "#{req_path}.json"
-    else
-      ## no special rule
-    end
 
     page_path = "#{host_dir}/#{req_path}"
     page_path

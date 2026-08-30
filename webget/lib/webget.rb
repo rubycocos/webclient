@@ -13,6 +13,7 @@ require_relative 'webget/version'   # let version go first
 
 require_relative 'webget/webcache_headers'
 require_relative 'webget/webcache_disk'
+require_relative 'webget/webcache_disk-rewrite'
 require_relative 'webget/webcache'
 
 

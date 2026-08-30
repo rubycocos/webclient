@@ -13,10 +13,12 @@ class Webclient
     ### internal helper
     ###    to get "upstream" encoding
     ###         note - unicode bom will override user encoding !!!
+    ##  -- use _text_encoding_upstream or such - why? why not?
 
-    def _text_encoding_bom() defined?( @_text_encoding_bom ) ?  @_text_encoding_bom : nil; end
-    ## use _text_encoding_upstream or such - why? why not?
-    def _text_encoding()    defined?( @_text_encoding ) ?  @_text_encoding : nil;  end
+    def _text_encoding_bom()   defined?( @_text_encoding_bom )  ?  @_text_encoding_bom : nil; end
+    def _text_encoding()       defined?( @_text_encoding )      ?  @_text_encoding : nil;  end
+    def _text_encoding_valid() defined?( @_text_encoding_valid) ?  @_text_encoding_valid : nil;  end
+    def _text_ascii_only()     defined?( @_text_ascii_only )    ?  @_text_ascii_only : nil;  end
 
 
     ## todo/check: rename encoding to html/http-like charset - why? why not?
@@ -35,6 +37,28 @@ class Webclient
       ##                otherwise force_encoding
       ##                    will change the encoding "upstream"
       text = text.dup
+
+
+      ##    note  - record 7bit ascii code range (ENC_CODERANGE_7BIT) check (on "raw" blob before changing encoding)
+      ##     see https://shopify.engineering/code-ranges-ruby-strings
+      ##
+      ##  String#ascii_only?
+      ##    returns true if every character in the string has a byte value between 0 and 127.
+      ##
+      ### ENC_CODERANGE_7BIT:
+      ##   Every single byte in the string is between 0 and 127.
+      ##  If this flag is already set, ascii_only?
+      ##  immediately returns true.
+      ##
+      ##  ENC_CODERANGE_VALID:
+      ##    The string contains valid characters for its encoding (like UTF-8),
+      ##   but at least one character is outside the 0–127 range
+      ##   (e.g., it contains a 128+ byte).
+      ## If this flag is set, it immediately returns false.
+      ##
+      ##
+      ##              check before optional bom-removal
+      @_text_ascii_only    = text.ascii_only?
 
 
       ###
@@ -91,6 +115,9 @@ class Webclient
          ## note - get a duplicate
          ##           otherwise
          text = text.force_encoding( Encoding::UTF_8 )
+
+         ## track/check code range if valid/broken
+         @_text_encoding_valid = text.valid_encoding?
       else
         ## [debug] GET=http://www.football-data.co.uk/mmz4281/0405/SC0.csv
         ##    Encoding::UndefinedConversionError: "\xA0" from ASCII-8BIT to UTF-8
@@ -106,6 +133,10 @@ class Webclient
        ##   Encoding::UTF_8 => 'UTF-8'
           puts "  [debug] try converting response.text encoding from >#{encoding}< to >UTF-8<"
           text = text.force_encoding( encoding )
+
+          ## track/check code range if valid/broken
+          ##   note - check BEFORE conversion to utf-8 - why? why not?
+          @_text_encoding_valid = text.valid_encoding?
 
           replace = true
           if replace
@@ -126,6 +157,29 @@ class Webclient
           end
       end
 
+
+     # Normalize unicode (utf-8) string to Composed (NFC)
+     #    NFC (Normalization Form Canonical Composition)
+
+=begin
+  use nfkc ??
+  or delegate to userland??
+
+Pro-Tip: Watch out for Ligatures and Compatibility Issues
+While NFC handles standard accents beautifully,
+you might occasionally want NFKC (Normalization Form Compatibility Composition)
+instead.
+ pages sometimes contain legacy typographical quirks like:
+ Ligatures: The characters ﬁ or ﬂ typed as a single glyph.
+ Roman Numerals / Fractions: Characters like Ⅳ or ½.
+
+ If you use standard NFC, those symbols remain as complex single characters.
+ If you use NFKC, Ruby will break them down into standard,
+ easily searchable text (ﬁ becomes fi, Ⅳ becomes IV, and ½ becomes 1/2).
+=end
+
+     text = text.unicode_normalize(:nfc)
+
       text
     end
 
@@ -134,10 +188,23 @@ class Webclient
     def json() JSON.parse( text ); end
 
 
+    ###
+    ###  fix-fix-fix    fix-fix-fix
+    ##      avoid  text.dup
+    ##
+    ##  and always use  @response.body.to_s.b
+    ##         or body.b  (binary ascii-7bit) string/buffer here !!!!
+    ##
+    ##  # 1. Get raw binary data so Ruby doesn't guess the encoding yet
+    ##  raw_body = response.body.b
+    ##
     def body() @response.body.to_s; end
     alias_method :blob, :body
 
 
+    ####
+    ###  fix-fix-fix
+    ###   move  to webclient_headers.rb
 
     class Headers # nested (nested) class
       def initialize( response )
