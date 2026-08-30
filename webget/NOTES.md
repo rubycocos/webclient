@@ -1,5 +1,47 @@
 # Notes
 
+
+- [ ] add custom headers
+
+
+```
+## add HTTP/1.1 200 OK   too - why? why not?
+
+x-url:        #   x-addr ++ x-fil
+x-addr:       # The original URL address part.
+x-fil:        # The original URL path part.
+x-encoding:   # original charset encoding, text always stored in utf-8!!
+
+x-save:       # The local filename, depending on user's "build structure" x-size:       # The stored (either in cache, or in an external file) data size
+preferences.
+```
+
+The One Exception: URL Fragments (#)The only part of a URL path structure that is not recorded in X-URL is the URL fragment (anything after a # symbol, such as https://example.com).
+
+
+- [ ] maybe later check if possible to convert to
+       standard ISO WARC web logs?
+        see
+
+
+- [ ]  maybe track 404 NOT FOUND - why? why not?
+
+```
+Example 3: Error Page Tracking (404 Not Found)HTTrack captures error instances to avoid repeatedly querying missing structural files on subsequent syncs.httpX-URL: https://example.com
+X-Status: 404
+X-Mime: text/html
+X-Size: 1204
+```
+
+
+
+## Cache Format
+
+try to learn from <https://www.httrack.com/html/cache.html> !!!
+
+
+
+
 ## More Cache Gems (to checkout)
 
 - <https://github.com/gurgeous/httpdisk>
@@ -44,4 +86,3 @@ Crawl-Delay: 20
 - <https://en.wikipedia.org/wiki/Web_scraping>
 - <https://en.wikipedia.org/wiki/Web_crawler>
 - <https://en.wikipedia.org/wiki/Googlebot>
-

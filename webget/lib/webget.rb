@@ -10,7 +10,12 @@ require 'cocos'   # - note - cococs incl. webclient & cvsreader  !!!!
 
 ## our own code
 require_relative 'webget/version'   # let version go first
+
+require_relative 'webget/webcache_headers'
+require_relative 'webget/webcache_disk'
 require_relative 'webget/webcache'
+
+
 require_relative 'webget/webget'
 
 

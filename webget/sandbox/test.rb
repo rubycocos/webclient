@@ -15,7 +15,7 @@ puts Webcache.config.root
 
 
 
-url = 'https://raw.githubusercontent.com/openfootball/football.json/master/2015-16/en.1.clubs.json'
+url = 'https://raw.githubusercontent.com/openfootball/football.json/master/2025-26/en.1.json'
 res = Webclient.get( url )
 puts res.status.code       #=> 200
 puts res.status.message    #=> OK
@@ -29,7 +29,7 @@ puts "json:"
 puts res.json
 
 
-Webcache.record( url, res )
+Webcache.record( url, res, format: 'json' )
 
 puts Webcache.exist?( url )
 puts Webcache.cached?( url )
@@ -59,7 +59,7 @@ pp Webcache.expired?( url, expires_in: Time.now.utc+60*60 )
 
 
 
-url = 'http://www.football-data.co.uk/mmz4281/1920/E0.csv'
+url = 'https://www.football-data.co.uk/mmz4281/1920/E0.csv'
 res = Webget.dataset( url, encoding: 'Windows-1252' )
 puts res.status.code       #=> 200
 puts res.status.message    #=> OK
@@ -70,7 +70,7 @@ puts "text:"
 puts res.text( encoding: 'Windows-1252' )
 
 
-url = 'https://fbref.com/en/comps/56/schedule/Austrian-Bundesliga-Scores-and-Fixtures'
+url = 'https://rsssf.org/tablesa/aus2025.html'
 res = Webget.page( url )
 puts res.status.code       #=> 200
 puts res.status.message    #=> OK
@@ -82,4 +82,3 @@ puts res.text[0..200]
 
 
 puts "bye"
-
