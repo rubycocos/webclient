@@ -49,8 +49,6 @@ require_relative 'mirror/database-models'
 require_relative 'mirror/find_links'  ## find_links helper 'n' more
 require_relative 'mirror/download_page'
 
-### commands
-require_relative 'mirror/list'
 require_relative 'mirror/mirror'
 
 

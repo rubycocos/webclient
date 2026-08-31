@@ -52,7 +52,8 @@ def _download_page( url,
       ##   and    use/add response.text_with_encoding( ) - why? why not?
 
       meta = {
-          encoding:        response._text_encoding,
+          encoding:         response._text_encoding,
+          ##  encoding_source:  '?',   ## fix -   bom|http|html|user - add fallback too?
           content_length:  response.content_length,
           content_type:    response.content_type,
           status:          response.status.code,

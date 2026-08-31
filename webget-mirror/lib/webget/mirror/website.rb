@@ -101,9 +101,10 @@ class Website
                       ## note - block only called on create (NOT find!!)
                       puts "  add page #{rec.path} (cached: false) to mirror.db"
 
-                      rec.basename = File.basename( rec.path, File.extname( rec.path ))
-                      rec.extname  = File.extname( rec.path )
-                      rec.dirname  = File.dirname( rec.path )
+                      ##  note - handled with before_create autofill
+                      ## rec.basename = File.basename( rec.path, File.extname( rec.path ))
+                      ## rec.extname  = File.extname( rec.path )
+                      ## rec.dirname  = File.dirname( rec.path )
 
                       rec.encoding = encoding
                       rec.cached   = false

@@ -88,12 +88,12 @@ def _mirror_pages( site:,
        page_recs.each_with_index do |page_rec,i|
 
         ##
-        ##  fix - change to mime type - why? why not?
+        ##  fix-fix-fix  - change to mime type - why? why not?
         ##           allow pages with no extensions!!!
 
          ### special case for non .html/.htm pages (e.g. .pdf others too??)
          ##    do NOT download / mirror / cache for now
-         if !['.html', '.htm'].include?( page_rec.extname )
+         if !['.html', '.htm'].include?( page_rec.extname.downcase )
             page_rec.update!( cached: true )
             next
          end
@@ -139,6 +139,11 @@ def _mirror_pages( site:,
 
          url = site.base_url+page_rec.path
 
+
+         ###
+         ###  todo - add exclude/exclude_path  to website config
+
+
          html, response_meta  =  if %r{/USAdave/}.match?(page_rec.path)
                                          ['', {status: 404}]
                                   else
@@ -174,6 +179,9 @@ def _mirror_pages( site:,
 
           html = site.errata( html, url: url )
 
+
+
+
          ## Standard HTML4-style parsing (default)
          ## doc = Nokogiri::HTML(malformed_html)
          ##  -or-
@@ -200,6 +208,9 @@ def _mirror_pages( site:,
              ## <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252">
              ## <meta charset="Windows-1252">
 
+             ###
+             ## fix-fix-fix   limit search to 1024 ( or allow double 2048)
+
              html_doctype =  (m=HTML_DOCTYPE_RE.match( html )) ? m[:doctype] : nil
              html_charset =  (m=HTML_CHARSET_RE.match( html )) ? m[:charset] : nil
 
@@ -223,9 +234,9 @@ def _mirror_pages( site:,
                                                             path: path ) do |rec|
                                     puts "     add linked page #{rec.path}"
 
-                                    rec.basename = File.basename( rec.path, File.extname( rec.path ))
-                                    rec.extname  = File.extname( rec.path )
-                                    rec.dirname  = File.dirname( rec.path )
+                                    ## rec.basename = File.basename( rec.path, File.extname( rec.path ))
+                                    ## rec.extname  = File.extname( rec.path )
+                                    ## rec.dirname  = File.dirname( rec.path )
 
                                     rec.encoding = site.page_encoding( rec.path )
                                     rec.cached   = false

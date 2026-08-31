@@ -54,6 +54,9 @@ def _find_links( site:,
 ###
 ###
 ##     fix - move into site config!!!!
+##            use autofix_href
+##               or  autofix_link or such??
+
 
 ##
 ## auto-fix ("site-wide") known quirks:
@@ -69,6 +72,9 @@ def _find_links( site:,
                  href = href.sub( %r{\.html\.html}i, '.html' )
 
 
+                ###
+                ##  fix - add more to skip
+                ##          e.g. (inline) javascript etc.
 
               ## note - skip mailto links
                 next   if /\Amailto/i.match?( href )
