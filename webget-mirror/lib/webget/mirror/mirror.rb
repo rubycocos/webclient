@@ -7,28 +7,6 @@ visited: 100 (downloaded: 98) -  35586 page(s) indexed (9158 cached, 26428 missi
     [98/26526 -  0.00%]  2:14 mins -  1.38 secs/page, estimate: 608:53 mins
 =end
 
-def fmt_time_diff( time_start, time_end=Time.now, count:, step: nil )
-   time_diff  = time_end - time_start
-   buf = String.new
-
-     if count == 0 || step == 0
-       buf +=  "  %d:%02d mins" % [time_diff/60, time_diff%60]
-     elsif step
-       buf +=  "  [#{step}/#{count} - %5.2f%%]" % [step*100/count]
-
-       buf +=  "  %d:%02d mins" % [time_diff/60, time_diff%60]
-       buf +=  " - %5.2f secs/page" % [time_diff/step]
-
-       time_estimate = (time_diff/step) * count
-       buf +=  ", estimate: %d:%02d mins" % [time_estimate/60, time_estimate%60]
-    else
-      buf +=  "  %d:%02d mins" % [time_diff/60, time_diff%60]
-      buf +=  " - %5.2f secs/page  (#{count} pages)" % [time_diff/count]
-   end
-
-   buf
-end
-
 
 
 ##
@@ -63,17 +41,34 @@ def _mirror_pages( site:,
        ## /intclub.html
        ## /intland.html
 
-      page_recs =  MirrorDb::Model::Page.where( cached: false,
-                                                path: ['/curdom.html',
+=begin
+  build path [] from start_pages!! e.g.
+                                            path: ['/curdom.html',
                                                        '/curtour.html',
                                                         '/histdom.html',
                                                         '/intclub.html',
                                                         '/intland.html']
+=end
+     ### todo - move into website config
+     ##                 use start_path - why? why not?
+       start_path = []
+       site.start_pages.each do |config|
+          start_path << config['page']
+       end
+
+
+      page_recs =  MirrorDb::Model::Page.where( cached: false,
+                                                path:   start_path
                                                ).limit( batch )
 
        ## note - sql (like) wildcard rules/syntax:
        ##      %: Matches zero or more characters
        ##      _: Matches exactly one character
+
+       ##
+       ## todo - add/move to website config
+       #             use   path_like  or such
+       #                path_like  ??
 
       if page_recs.size == 0
         page_recs =  MirrorDb::Model::Page.where( cached: false ).
