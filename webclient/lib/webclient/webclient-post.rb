@@ -1,6 +1,14 @@
 
 class Webclient
 
+
+
+##
+## todo/check
+##   maybe add a
+###    self.post_form( url, form/params, **kwargs) - why? why not?
+###
+
 def self.post( url, headers: {},
                     auth: [],
                     body: nil,
@@ -48,6 +56,13 @@ def self.post( url, headers: {},
 
   if form
      ## fix-fix-fix: urlencode key/values!!!!!
+
+     ###
+     ## maybe use ??
+     ##  uri = URI "http://localhost:4567/greet"
+     ##    params = { :name => 'Peter' }
+     ##    uri.query = URI.encode_www_form params
+
      form_urlencoded = form.map do |k,v|
                                      "#{k}=#{v}"
                                  end.join( '&' )
