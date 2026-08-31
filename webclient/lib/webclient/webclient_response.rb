@@ -44,6 +44,7 @@ class Webclient
     def _text_encoding()       defined?( @_text_encoding )      ?  @_text_encoding : nil;  end
     def _text_encoding_valid() defined?( @_text_encoding_valid) ?  @_text_encoding_valid : nil;  end
     def _text_ascii_only()     defined?( @_text_ascii_only )    ?  @_text_ascii_only : nil;  end
+    def _text_8bit()           defined?( @_text_8bit )          ?  @_text_8bit : nil;  end
 
 
     ## todo/check: rename encoding to html/http-like charset - why? why not?
@@ -117,6 +118,31 @@ class Webclient
       else
          nil   # no bom found
       end
+
+###
+###    if encoding.start_with? utf
+##           or has encoding_bom
+###       do nothing
+##      otherwise
+##           tally all 8-bit ascii chars (above > 127)
+
+      if encoding_bom || encoding.downcase.start_with?( 'utf' )
+           @_text_8bit = nil
+      else
+         ## get/track 8-bit bytes (1xxxxxxx), that is, > 127 (128-255)
+         bytes  = text.bytes.select { |byte| byte > 127 }
+
+         if bytes.empty?
+           @_text_8bit = nil
+         else
+           @_text_8bit = "#{bytes.count} - "
+           ##  bytes.tally
+           ## e.g.  {195=>1, 169=>1, 240=>1, 159=>1, 152=>1, 138=>1}
+           ##    note - use sort (turns in array e.g. [[138,1],...])
+           @_text_8bit += bytes.tally.sort.map {|ord,count| "#{ord}=>#{count}"}.join(', ')
+         end
+      end
+
 
 
       if encoding_bom

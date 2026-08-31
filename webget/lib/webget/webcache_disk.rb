@@ -102,6 +102,7 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
       x_encoding       = nil   ## for now do not track; always assume  UTF-8
       x_encoding_valid = nil
       x_ascii_only     = nil
+      x_8bit           = nil
     elsif format == 'csv'
       ## fix: newlines - always use "unix" style" - why? why not?
       ## fix:  use :newline => :universal option? translates to univeral "\n"
@@ -113,6 +114,7 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
       x_encoding       = response._text_encoding
       x_encoding_valid = response._text_encoding_valid  # true|false or nil (undef)
       x_ascii_only     = response._text_ascii_only
+      x_8bit           = response._text_8bit
     else   ## html or txt
       text          = response.text( encoding: encoding ).gsub( "\r\n", "\n" )
       File.open( body_path, 'w:utf-8' ) {|f| f.write( text ) }
@@ -122,6 +124,7 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
       x_encoding       = response._text_encoding
       x_encoding_valid = response._text_encoding_valid  # true|false or nil (undef)
       x_ascii_only     = response._text_ascii_only
+      x_8bit           = response._text_8bit
     end
 
 
@@ -144,6 +147,7 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
       ##     change x-save to x-filename or ??
       ##     change to x-7bit-only or x-ascii7bit or x-ascii7bit-only or ??
       ##     change x-size to x-bytesize or ??
+      ##     change x-8bit  to ???
 
       ### start w/ comment line
       ###   uncomment - http status - why? why not?
@@ -156,6 +160,7 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
       f.write( "x-encoding: #{x_encoding}\n" )              if x_encoding
       f.write( "x-encoding-valid: #{x_encoding_valid}\n" )  if x_encoding_valid
       f.write( "x-ascii-only: #{x_ascii_only}\n" )          if x_ascii_only
+      f.write( "x-8bit: #{x_8bit}\n" )                      if x_8bit
       f.write( "x-save: #{save_path}\n" )
       f.write( "x-size: #{x_size}\n")
       f.write( "x-format: #{format}\n" )     ## e.g. json|html|csv|etc.
