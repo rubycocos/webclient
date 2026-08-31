@@ -128,20 +128,28 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
     ### fix-fix-fix  -- add support for binary/image formats
     ##     e.g. bin|gif|jpg|etc  - why? why not?
 
+    ####
+    ## get file size in bytes
+    ##     or use File.stat( body_path ).size (using File::Stat) ??
+    x_size    = File.size( body_path )
+
+
 
     File.open( meta_path, 'w:utf-8' ) do |f|
       ## todo/check:
       ##  do headers also need to converted (like text) if encoding is NOT utf-8 ???
 
-      ###
-      ##  check -
-      ##  add HTTP/1.1 200 OK   or such as first line !!!
 
       #### add our own custom headers first!!
-      ##   change x-save to x-filename or ??
-      ##   use x-7bit-only or x-ascii7bit or x-ascii7bit-only or ??
-      ##
-      ## todo - add x-size for actual bytesize of saved file - why? why not??
+      ##     change x-save to x-filename or ??
+      ##     change to x-7bit-only or x-ascii7bit or x-ascii7bit-only or ??
+      ##     change x-size to x-bytesize or ??
+
+      ### start w/ comment line
+      ###   uncomment - http status - why? why not?
+      f.write( "# fetched on #{Time.now.utc}\n")
+      f.write( "# HTTP/#{response.status.http_version} #{response.status.code} #{response.status.message}\n")
+      f.write( "\n" )
 
       f.write( "x-url: #{url}\n" )
       f.write( "x-encoding-bom: #{x_encoding_bom}\n" )      if x_encoding_bom
@@ -149,6 +157,7 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
       f.write( "x-encoding-valid: #{x_encoding_valid}\n" )  if x_encoding_valid
       f.write( "x-ascii-only: #{x_ascii_only}\n" )          if x_ascii_only
       f.write( "x-save: #{save_path}\n" )
+      f.write( "x-size: #{x_size}\n")
       f.write( "x-format: #{format}\n" )     ## e.g. json|html|csv|etc.
       f.write( "\n" )
 
