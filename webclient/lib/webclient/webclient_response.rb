@@ -1,38 +1,11 @@
 
 class Webclient
+  # wrap Net::HTTP::Response  or
+  #    maybe HTTPX or such in the future
 
-  # wrap Net::HTTP::Response
+  ## check - rename to HttpResponse?
+  ##      and use  HttpErrorResponse or such - why? why not?
   class Response
-    class Status  # nested class  Response::Status
-      ### fix-fix-fix
-      ##  maybe fold back
-      ##      into response.status | status_code
-      ##           response.status_message | status_msg
-      ##         keep it simple?
-      ##
-      ##   keep status.ok?    =>  response.ok?
-      ##   keep status.nok?   =>  response.nok?
-
-      def initialize( response )
-        @response = response
-      end
-
-
-      ## note - upstream Net::HTTP::Response::code is a string e.g. "200"!!!
-      ##             convert to integer number
-      def code() @response.code.to_i(10); end
-      def ok?()  code == 200; end
-      def nok?() code != 200; end
-
-      def message() @response.message; end
-      alias_method :msg, :message   ## add/keep shorter alias too - why? why not?
-    end  # (nested) class Status
-
-    def status()  @status ||= Status.new( @response ); end
-
-
-
-
     def initialize( response )
       @response = response
     end
@@ -41,6 +14,21 @@ class Webclient
     ##   note - raw used by python requests too
     ##            use for streaming and such - why? why not?
     def raw() @response; end
+
+
+    ###############
+    ##  response status methods
+
+    def status
+      @status ||= Status.new( @response.code, message: @response.message )
+    end
+
+    ## add  "flat" shortcuts - keep - why? why not?
+    def status_code()  status.to_i; end
+    def ok?()          status.ok?; end
+    def nok?()         status.nok?; end
+
+
 
     ###
     ## keep http_version on Response - why? why not?
@@ -51,28 +39,41 @@ class Webclient
 
 
 
-    ## convenience helper; returns parsed json data; note: always assume utf-8 (text) encoding
-    ##   cache returned (parsed) json value - why? why not?
-    def json() @json ||= JSON.parse( text ); end
 
 
     ###
-    ###  fix-fix-fix    fix-fix-fix
-    ##      avoid  text.dup
-    ##
-    ##  and always use  @response.body.to_s.b
+    #  note - add a writeable  encoding_user attribute
+    ##            on default (if not set by user) returns nil
+    def _encoding_user=( value ) @_encoding_user = value; end
+    def _encoding_user()  defined?( @_encoding_user )  ?  @_encoding_user : nil;  end
+
+    ## cache (returned) decoded text - why? why not?
+    def text( encoding: _encoding_user )
+        @text ||= _decode_text( encoding: encoding )
+    end
+
+    ## convenience helper; returns parsed json data; note: always assume utf-8 (text) encoding
+    ##   cache returned (parsed) json value - why? why not?
+    ##   add :symbolize_keys option - why? why not?
+    def json
+        @json ||= JSON.parse( text )
+    end
+
+
+
+    ##  always use t raw binary data
+    ##  and always use  @response.body.b
     ##         or body.b  (binary ascii-7bit) string/buffer here !!!!
     ##
-    ##  # 1. Get raw binary data so Ruby doesn't guess the encoding yet
-    ##  raw_body = response.body.b
-    ##
+
     def body() @response.body.b; end
     alias_method :blob, :body
 
 
 
-
-    class Headers # nested class Response::Headers
+    ################
+    # nested class Response::Headers
+    class Headers
       def initialize( response )
         @response = response
       end
@@ -81,25 +82,25 @@ class Webclient
           blk.call( key, value )
         end
       end
-    end   # nested class Response::Headers
-    def headers() @headers ||= Headers.new( @response ); end
+    end    # nested class Response::Headers
+
+    def headers
+       @headers ||= Headers.new( @response )
+    end
 
 
 
 
     ## add some predefined/built-in header(s) convenience shortcuts
-    def content_type
-      ## check: change to headers['content-type'] or such - why? why not?
-      @response.content_type
-    end
-    def content_length
-      @response.content_length
-    end
+    ## check: change to headers['content-type'] or such - why? why not?
+    def content_type()    @response.content_type; end
+    def content_length()  @response.content_length; end
 
-    def image_jpg?()   content_type.match?( %r{image/jpeg}i );   end
-    def image_png?()   content_type.match?( %r{image/png}i );    end
-    def image_gif?()   content_type.match?( %r{image/gif}i );    end
-
+    ###
+    ##  note - content_type might return nil, thus, use to_s (gets converted to "")
+    def image_jpg?()   content_type.to_s.match?( %r{image/jpeg}i );   end
+    def image_png?()   content_type.to_s.match?( %r{image/png}i );    end
+    def image_gif?()   content_type.to_s.match?( %r{image/gif}i );    end
 
     alias_method :image_jpeg?, :image_jpg?
     alias_method :jpeg?, :image_jpg?

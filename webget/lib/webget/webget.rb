@@ -39,7 +39,8 @@ class Webget   # a web (go get) crawler
 
     ## to be done / continued
     response
-  end  # method self.call
+  end  # method self._get_and_record
+
 
 
 

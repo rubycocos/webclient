@@ -16,6 +16,9 @@ normalized_nfc = player_nfc.unicode_normalize(:nfc)
 puts normalized_nfd == normalized_nfc
 # => true (Fixed!)
 
+
+
+
 Why CP1252 (Windows-1252) is swapped for ISO-8859-1
 The script safely
 swaps ISO-8859-1 out for CP1252 (Windows-1252).

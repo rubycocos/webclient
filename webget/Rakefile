@@ -8,7 +8,7 @@ Hoe.spec 'webget' do
   self.summary = 'webget gem - a web (go get) crawler incl. web cache'
   self.description = summary
 
-  self.urls    = { home: 'https://github.com/rubycoco/webclient' }
+  self.urls    = { home: 'https://github.com/rubycocos/webclient' }
 
   self.author  = 'Gerald Bauer'
   self.email   = 'gerald.bauer@gmail.com'
@@ -18,8 +18,7 @@ Hoe.spec 'webget' do
   self.history_file = 'CHANGELOG.md'
 
   self.extra_deps = [
-    ['webclient', '>= 0.2.0'],
-    ['csvreader', '>= 1.2.4'],
+    ['webclient', '>= 0.3.1'],
     ['cocos'],
   ]
 

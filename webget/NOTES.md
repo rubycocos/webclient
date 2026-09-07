@@ -29,7 +29,7 @@
 
 
 
-- [ ] add custom headers
+- [x] add custom headers
 
 
 ```

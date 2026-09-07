@@ -5,4 +5,7 @@ Rakefile
 lib/webget.rb
 lib/webget/version.rb
 lib/webget/webcache.rb
+lib/webget/webcache_disk-rewrite.rb
+lib/webget/webcache_disk.rb
+lib/webget/webcache_headers.rb
 lib/webget/webget.rb

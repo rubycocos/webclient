@@ -25,6 +25,7 @@ require_relative 'webclient/version'   # note: let version always go first
 require_relative 'webclient/webclient-get'
 require_relative 'webclient/webclient-post'
 require_relative 'webclient/webclient_response'
+require_relative 'webclient/webclient_response-status'
 require_relative 'webclient/webclient_response-text'
 
 

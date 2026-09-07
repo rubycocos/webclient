@@ -4,4 +4,8 @@ README.md
 Rakefile
 lib/webclient.rb
 lib/webclient/version.rb
-lib/webclient/webclient.rb
+lib/webclient/webclient-get.rb
+lib/webclient/webclient-post.rb
+lib/webclient/webclient_response-status.rb
+lib/webclient/webclient_response-text.rb
+lib/webclient/webclient_response.rb

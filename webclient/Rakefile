@@ -8,10 +8,10 @@ Hoe.spec 'webclient' do
   self.summary = 'webclient gem - yet (another) universal network client interface for world wide web (www) requests via HTTP'
   self.description = summary
 
-  self.urls    = { home: 'https://github.com/rubycoco/webclient' }
+  self.urls    = { home: 'https://github.com/rubycocos/webclient' }
 
   self.author  = 'Gerald Bauer'
-  self.email   = 'ruby-talk@ruby-lang.org'
+  self.email   = 'gerald.bauer@gmail.com'
 
   # switch extension to .markdown for gihub formatting
   self.readme_file  = 'README.md'

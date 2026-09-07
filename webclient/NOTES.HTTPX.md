@@ -14,12 +14,13 @@ puts response.headers["content-type"] # => "application/json
 ```
 
 - [ ] use response.status    instead of  response.status.code ?
-- [ ] use response.version   instead of  response.status.http_version ?
 
 
 what about response.status.message|msg?
 
-the HTTPX::Response object does not provide a built-in method or text property (like .status_message or .reason)
+the HTTPX::Response object does not provide a built-in method or text property
+(like .status_message or .reason)
 to return text phrases like "Not Found" or "OK".
+
 This is primarily because the modern HTTP/2 protocol completely omitted status text phrases
 from its spec to save bandwidth—only the numeric code is transmitted.

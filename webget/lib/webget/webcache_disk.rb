@@ -5,9 +5,12 @@ module Webcache
 class DiskCache     ### todo/check - change to Disk - why? why not?
 
 
+  def _body_path( url ) "#{Webcache.root}/#{url_to_path( url )}"; end
+  def _meta_path( url ) "#{Webcache.root}/#{url_to_path( url )}.meta.txt"; end
+
 
   def cached?( url )
-    body_path = "#{Webcache.root}/#{url_to_path( url )}"
+    body_path = _body_path( url )
     exist =  File.exist?( body_path )
 
 =begin
@@ -35,31 +38,28 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
   ### fix-fix-fix
   ##    change to read_txt/read_text/read_html
   ##  plus add
-  ##     read_blob/read_bin !!!
+  ##     read_blob/read_bin(ary) !!!
   def read( url )
-    body_path = "#{Webcache.root}/#{url_to_path( url )}"
-    _read_utf8( body_path )
+    _read_utf8(_body_path( url ))
   end
 
+
+
   def read_json( url )
-    body_path = "#{Webcache.root}/#{url_to_path( url )}"
-    txt = _read_utf8( body_path )
+    txt = _read_utf8(_body_path( url ))
     data = JSON.parse( txt )
     data
   end
 
   def read_csv( url )
-    body_path = "#{Webcache.root}/#{url_to_path( url )}"
-    txt = _read_utf8( body_path )
+    txt = _read_utf8(_body_path( url ))
     data = CsvHash.parse( txt )
     data
   end
 
 
   def read_meta( url )
-    body_path = "#{Webcache.root}/#{url_to_path( url )}"
-    meta_path = "#{body_path}.meta.txt"
-    txt = _read_utf8( meta_path )
+    txt = _read_utf8(_meta_path( url ))
     data = Headers.parse( txt )
     data
   end
@@ -81,8 +81,8 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
     ## todo/check - use rel_path or local_path or such??
     save_path = url_to_path( url )
 
-    body_path = "#{Webcache.root}/#{save_path}"
-    meta_path = "#{body_path}.meta.txt"
+    body_path = _body_path( url )
+    meta_path = _meta_path( url )   ## is _body_path + ".meta.txt"
 
     ## make sure path exits
     FileUtils.mkdir_p( File.dirname( body_path ) )
@@ -168,6 +168,7 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
 
 
   ### helpers
+
   def url_to_path( str )
     ## map url to file path
     uri = URI( str )       ## URI() same as URI.parse()
@@ -180,7 +181,8 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
     ## "/this/is/everything?query=params"
     ##   cut-off leading slash and
     ##    convert query ? =
-    req_path =   rewrite_path( host_dir, uri.request_uri[1..-1] )
+    ##   check if [1..] is sames as [1..-1]
+    req_path =   rewrite_path( host_dir, uri.request_uri[1..] )
 
 
     page_path = "#{host_dir}/#{req_path}"
@@ -188,19 +190,53 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
   end
 
 
+
   def _read_utf8( path )
+##  note - by default ruby on windows (automagically)
+##          translates \r\n newlines to \n (universal/unix-style)
+##                  when read files!!!!
+##   note - only handles \r\n  (not "legacy" mac classic-style \r)
+
     File.open( path, 'r:utf-8' ) {|f| f.read }
   end
 
   def _write_utf8( path, text )
-     ##  write out utf8 (always use "universal" newlines on any platform)
-     ##    todo / fix -   add  universial or such to open too ??
-     ##
-     ## fix: newlines - always use "unix" style" - why? why not?
-     ## fix:  use :newline => :universal option? translates to univeral "\n"
+##  write out utf8 (always use "universal" newlines on any platform)
+##    todo / fix -   add  universial or such to open too ?
+##
+## fix: newlines - always use "unix" style" - why? why not?
+## fix:  use :newline => :universal option? translates to univeral "\n"
+##
+##
+##  The universal_newline: true flag forces Ruby to look through the string and
+##   convert both Windows-style (\r\n) and old Mac-style (\r) newlines
+##  into the standard Unix newline (\n)
+##
+##  File.open("output.txt", "w", universal_newline: true) do |file|
+##     file.write(content)
+##  end
+##
+##  mixed_string = "Line one\r\nLine two\rLine three\n"
+##
+##   Converts all \r\n and \r into \n
+##     clean_string = mixed_string.encode(universal_newline: true)
+##
+##  Why Use encode Instead of gsub?
+##  While many developers use regular expressions like .gsub(/\r\n?/, "\n"),
+##   using .encode is highly preferred because:
+##  Edge-case Safety: It is an internal, optimized C-level implementation
+##   that handles mixed and broken newline edges perfectly.
+##  Encoding Preservation: It seamlessly preserves the existing character encoding
+##    (e.g., UTF-8) of your string.
+##
+##  was -  text  = text.gsub( "\r\n", "\n" )
+##
+##  note - by default ruby on windows (automagically) translates newlines to \r\n (crlf)!!!
+##          thus, always use/ add universal_newline flag!!!
 
-    text  = text.gsub( "\r\n", "\n" )
-    File.open( path, 'w:utf-8' ) {|f| f.write( text ) }
+    File.open( path, 'w:utf-8', universal_newline: true ) do |f|
+        f.write( text )
+    end
   end
 end # class DiskCache
 

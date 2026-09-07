@@ -1,21 +1,6 @@
 
 class Webclient
-
-  # wrap Net::HTTP::Response  or
-  #   mayble latter response from HTTTPX or Faraday ??
-class Response
-
-    ###
-    #  note - add a writeable  encoding_user attribute
-    ##            on default (if not set by user) returns nil
-    def _encoding_user=( value ) @_encoding_user = value; end
-    def _encoding_user()  defined?( @_encoding_user )  ?  @_encoding_user : nil;  end
-
-    ## cache (returned) decoded text - why? why not?
-    def text( encoding: _encoding_user() )
-        @text ||= _decode_text( encoding: encoding )
-    end
-
+  class Response
 
 
    # regex to capture the charset from both HTML5 and HTML4 meta tags
@@ -29,8 +14,12 @@ class Response
    ##  The n flag forces Ruby to compile and process the regex as a raw sequence of bytes
    ##    (ASCII-8BIT). This allows it to safely match against US-ASCII, ASCII-8BIT,
    ##   or UTF-8 strings without throwing compatibility errors
-     HTML_CHARSET_RE = %r{ <meta[^>]+
-                            charset=["']? (?<charset> [^"' >]+)
+   ##  charset
+   ###   note - charset class was [^"' >]+ changed to more strict/simple [a-z0-9-_]+
+   ##   check if other "weirdo" encoding name exist?
+     HTML_CHARSET_RE = %r{ <meta [^>]+
+                            charset [ ]* = [ ]*
+                                    ["']? (?<charset> [a-z0-9_-]+)
                         }ixn
 
      HTML_CHARSET_ALIASES = {
@@ -71,7 +60,7 @@ class Response
 
     ## todo/check: rename encoding to html/http-like charset - why? why not?
     ##    or keep encoding as used for ruby's strings
-    def _decode_text( encoding: _encoding_user() )
+    def _decode_text( encoding: _encoding_user )
 
       if encoding.nil?
         encoding = 'UTF-8'     ### use UTF-8 as fallback (default encoding)
@@ -132,19 +121,19 @@ class Response
       encoding_bom =
       if text.start_with?("\x00\x00\xFE\xFF".b)
          text = text.byteslice(4..)
-         "UTF-32BE"
+         'UTF-32BE'
       elsif text.start_with?("\xFF\xFE\x00\x00".b)
          text = text.byteslice(4..)
-         "UTF-32LE"
+         'UTF-32LE'
       elsif text.start_with?("\xFE\xFF".b)
          text = text.byteslice(2..)
-         "UTF-16BE"
+         'UTF-16BE'
       elsif text.start_with?("\xFF\xFE".b)
          text = text.byteslice(2..)
-         "UTF-16LE"
+         'UTF-16LE'
       elsif text.start_with?("\xEF\xBB\xBF".b)
          text = text.byteslice(3..)
-         "UTF-8"
+         'UTF-8'
       else
          nil   # no bom found
       end
@@ -168,15 +157,34 @@ class Response
          ##     text/html
          ##     application/xhtml+xml
          ##          && check html meta charset in page in first 1028 bytes
+         ##
+         ##  note - content_type might return nil (guard with to_s!!)
+         ##   maybe use/make into  html? helper like gif? pdf? or such
 
-          if  content_type.match?( %r{text/html}i ) ||
-              content_type.match?( %r{application/xhtml}i )
+          if content_type.to_s.match?( %r{text/html}i ) ||
+             content_type.to_s.match?( %r{application/xhtml}i )
 
-               if( m = HTML_CHARSET_RE.match( text[0, 1028] ))
+             if (m = HTML_CHARSET_RE.match( text[0, 1028] ))
                  encoding_html =  m[:charset]
                  ## note - normalize encoding_html
                  ##    plus fix known type errors!!!
                  encoding_html = HTML_CHARSET_ALIASES[ encoding_html.downcase ] || encoding_html
+
+
+                 ## change/replace  ISO-8859-1 with Windows-1252 !!
+                 ##  Why CP1252 (Windows-1252) is swapped for ISO-8859-1
+                 ##   The script safely
+                 ##   swaps ISO-8859-1 out for CP1252 (Windows-1252).
+                 ##  Legally, the standard ISO-8859-1 encoding leaves bytes 128–159 empty
+                 ##  for control characters.
+                 ##  Microsoft's CP1252 fills those blank slots with highly common formatting marks
+                 ##  like the smart quotes (“”), the trademark symbol (™), and the en-dash (–).
+                 ##
+                 ##  Web browsers inherently treat ISO-8859-1 text as Windows-1252 to avoid breaking these common symbols, and this script mimics that behavior.
+
+                 encoding_html = 'Windows-1252'  if encoding_html.downcase == 'ISO-8859-1'
+
+
 
                  ## fix-fix-fix
                  ##  validate with ruby's builtin in encoding registry!!!
@@ -194,7 +202,7 @@ class Response
                  end
 
                  encoding_source = 'html'
-               end
+            end
           end
       end
 
