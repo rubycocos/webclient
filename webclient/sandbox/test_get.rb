@@ -1,3 +1,7 @@
+##################
+#  to run use
+#     $ ruby sandbox/test_get.rb
+
 
 $LOAD_PATH.unshift( "./lib" )
 require 'webclient'
@@ -32,7 +36,7 @@ pp res.content_length
 
 
 
-url = 'https://raw.githubusercontent.com/openfootball/football.json/master/2015-16/en.1.clubs.json'
+url = 'https://raw.githubusercontent.com/openfootball/football.json/master/2025-26/en.1.json'
 res = Webclient.get( url )
 puts res.status.code       #=> 200
 puts res.status.message    #=> OK
@@ -67,6 +71,3 @@ puts "text:"
 text = res.text( encoding: 'Windows-1252' )
 puts text
 puts text.encoding
-
-
-

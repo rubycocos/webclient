@@ -22,16 +22,15 @@ class Webget   # a web (go get) crawler
 
 
 
-  ## note - assumes json format 
+  ## note - assumes json format
   ##   encoding always utf-8 by definition! - double check?)
-  def self.call( url, headers: {} )  
+  def self.call( url, headers: {} )
     response = _get( url, headers: headers )
 
     if response.status.ok?  ## must be HTTP 200
       puts "#{response.status.code} #{response.status.message}"
       ## note: use format json for pretty printing and parse check!!!!
-      Webcache.record( url, response,
-                       format: 'json' )
+      Webcache.record( url, response, format: 'json' )
     else
       ## todo/check - log error
       puts "!! HTTP ERROR - #{response.status.code} #{response.status.message}:"
@@ -42,15 +41,19 @@ class Webget   # a web (go get) crawler
     response
   end  # method self.call
 
+
+
   ## todo/check: rename encoding to html/http-like charset - why? why not?
   ##   check encoding UTF-8 or utf-8  - makes a difference?
-  def self.page( url, encoding: 'UTF-8', headers: {} )  ## assumes html format
+  ##  note - default text encoding "upstream" in webclient for text is UTF-8!!
+
+  def self.page( url, encoding: nil, headers: {} )  ## assumes html format
     response = _get( url, headers: headers )
+    response._encoding_user = encoding
 
     if response.status.ok?  ## must be HTTP 200
       puts "#{response.status.code} #{response.status.message}"
-      Webcache.record( url, response,
-                       encoding: encoding  )   ## assumes format: html (default)
+      Webcache.record( url, response, format: 'html'  )
     else
       ## todo/check - log error
       puts "!! HTTP ERROR - #{response.status.code} #{response.status.message}:"
@@ -63,15 +66,13 @@ class Webget   # a web (go get) crawler
 
 
   ## assumes txt format
-  def self.text( url, path: nil, headers: {} )  
+  def self.text( url, encoding: nil, headers: {} )
     response = _get( url, headers: headers )
+    response._encoding_user = encoding
 
     if response.status.ok?  ## must be HTTP 200
       puts "#{response.status.code} #{response.status.message}"
-      ## note: like json assumes always utf-8 encoding for now !!!
-      Webcache.record( url, response,
-                       path: path,   ## optional "custom" (file)path for saving in cache
-                       format: 'txt' )
+      Webcache.record( url, response, format: 'txt' )
     else
       ## todo/check - log error
       puts "!! HTTP ERROR - #{response.status.code} #{response.status.message}:"
@@ -86,14 +87,13 @@ class Webget   # a web (go get) crawler
 
   ## todo/check: rename to csv or file or records or - why? why not?
   ## todo/check: rename encoding to html/http-like charset - why? why not?
-  def self.dataset( url, encoding: 'UTF-8', headers: {} )  ## assumes csv format
+  def self.dataset( url, encoding: nil, headers: {} )  ## assumes csv format
     response = _get( url, headers: headers )
+    response._encoding_user = encoding
 
     if response.status.ok?  ## must be HTTP 200
       puts "#{response.status.code} #{response.status.message}"
-      Webcache.record( url, response,
-                       encoding: encoding,
-                       format:   'csv' )    ## pass along csv format - why? why not?
+      Webcache.record( url, response, format: 'csv' )    ## pass along csv format - why? why not?
     else
       ## todo/check - log error
       puts "!! HTTP ERROR - #{response.status.code} #{response.status.message}:"
@@ -106,8 +106,9 @@ class Webget   # a web (go get) crawler
 
 
 
+
   ####
-  ##  private helpers 
+  ##  private helpers
   ##   make private - why? why not?
   def self._get( url, headers: {} )
      @@requests ||= 0     ## track number of requests
@@ -121,4 +122,3 @@ class Webget   # a web (go get) crawler
      Webclient.get( url, headers: headers )  ## returns respone
   end
 end  # class Webget
-

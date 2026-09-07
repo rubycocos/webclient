@@ -20,9 +20,15 @@ create_table :pages do |t|
    t.string :title          ##   html <title></title>
    t.date   :updated        ## iso date e.g. (2026-04-29) via web page source
 
+   ################
    ### add (charset) encoding stuff
-   t.string :encoding           ## "upstream" text encoding - all pages converted to utf-8 ALWAYS
-   t.boolean :ascii7bit    ## check if all chars are ascii 7bit (utf8-compatible) ??
+   t.string  :encoding           ## "upstream" text encoding - all pages converted to utf-8 ALWAYS
+   t.string  :encoding_source   ## e.g. bom|http|html|user|fallback
+
+   t.boolean :encoding_valid  ## uses  String#encoding_valid?
+   t.boolean :ascii7bit       ## uses  String#ascii_only?  check if all chars are ascii 7bit (utf8-compatible) ??
+   t.integer :chars_8bit       ## count of 8bit (126-255) chars - nil|0|1|2|etc.
+   t.integer :utf8_replace     ## count invalid/replace chars in utf8 - nil|0|1|2
    t.integer :tabs         ## count tabs/tabstops in html source (use tab or tabs ??)
 
 

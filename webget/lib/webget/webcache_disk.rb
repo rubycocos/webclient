@@ -38,19 +38,19 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
   ##     read_blob/read_bin !!!
   def read( url )
     body_path = "#{Webcache.root}/#{url_to_path( url )}"
-    File.open( body_path, 'r:utf-8' ) {|f| f.read }
+    _read_utf8( body_path )
   end
 
   def read_json( url )
     body_path = "#{Webcache.root}/#{url_to_path( url )}"
-    txt = File.open( body_path, 'r:utf-8' ) {|f| f.read }
+    txt = _read_utf8( body_path )
     data = JSON.parse( txt )
     data
   end
 
   def read_csv( url )
     body_path = "#{Webcache.root}/#{url_to_path( url )}"
-    txt = File.open( body_path, 'r:utf-8' ) {|f| f.read }
+    txt = _read_utf8( body_path )
     data = CsvHash.parse( txt )
     data
   end
@@ -59,28 +59,27 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
   def read_meta( url )
     body_path = "#{Webcache.root}/#{url_to_path( url )}"
     meta_path = "#{body_path}.meta.txt"
-    txt = File.open( meta_path, 'r:utf-8' ) {|f| f.read }
+    txt = _read_utf8( meta_path )
     data = Headers.parse( txt )
     data
   end
 
 
+
+
   ## add more save / put / etc. aliases - why? why not?
   ##  rename to record_html - why? why not?
 
-  ##
-  ## fix-fix-fix - change encoding: default to nil
-  ##
-  ###   fix-fix-fix - remove path option hack!!!
-  ##      use config to rewrite url_to_path !!!
+  def record( url, response, format: )
 
-  def record( url, response,
-              path: nil,
-              encoding: 'UTF-8',
-              format: 'html' )
+    ###
+    ## note - encoding_user MUST be passed along with response (wrapper) obj
+    ##           e.g.  response._encoding_user = encoding ??
+    ##                   see Webget.page|text|dataset|etc.
+
 
     ## todo/check - use rel_path or local_path or such??
-    save_path = url_to_path( url, path: path )
+    save_path = url_to_path( url )
 
     body_path = "#{Webcache.root}/#{save_path}"
     meta_path = "#{body_path}.meta.txt"
@@ -93,38 +92,24 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
 
     ## todo/check: verify content-type - why? why not?
     ## note - for now respone.text always assume (converted) to utf8!!!!!!!!!
-    ##
-    ## fix: newlines - always use "unix" style" - why? why not?
-    ## fix:  use :newline => :universal option? translates to univeral "\n"
+
     if format == 'json'
-      File.open( body_path, 'w:utf-8' ) {|f| f.write( JSON.pretty_generate( response.json )) }
-      x_encoding_bom   = nil
-      x_encoding       = nil   ## for now do not track; always assume  UTF-8
-      x_encoding_valid = nil
-      x_ascii_only     = nil
-      x_8bit           = nil
-    elsif format == 'csv'
-      ## fix: newlines - always use "unix" style" - why? why not?
-      ## fix:  use :newline => :universal option? translates to univeral "\n"
-      text          = response.text( encoding: encoding ).gsub( "\r\n", "\n" )
-      File.open( body_path, 'w:utf-8' ) {|f| f.write( text ) }
+      _write_utf8( body_path, JSON.pretty_generate( response.json ))
+      x_encoding        = nil   ## for now do not track; always assume  UTF-8
+      x_encoding_source = nil
+      x_encoding_valid  = nil
+      x_ascii_only      = nil
+      x_8bit            = nil
+      x_utf8_replace    = nil
+    else   ## html,  txt or csv
+      _write_utf8( body_path, response.text )
 
-      ### note - bom if different will overwrite (user) encoding!!!
-      x_encoding_bom   = response._text_encoding_bom
-      x_encoding       = response._text_encoding
-      x_encoding_valid = response._text_encoding_valid  # true|false or nil (undef)
-      x_ascii_only     = response._text_ascii_only
-      x_8bit           = response._text_8bit
-    else   ## html or txt
-      text          = response.text( encoding: encoding ).gsub( "\r\n", "\n" )
-      File.open( body_path, 'w:utf-8' ) {|f| f.write( text ) }
-
-      ### note - bom if different will overwrite (user) encoding!!!
-      x_encoding_bom   = response._text_encoding_bom
-      x_encoding       = response._text_encoding
-      x_encoding_valid = response._text_encoding_valid  # true|false or nil (undef)
-      x_ascii_only     = response._text_ascii_only
-      x_8bit           = response._text_8bit
+      x_encoding        = response._text_encoding
+      x_encoding_source = response._text_encoding_source
+      x_encoding_valid  = response._text_encoding_valid  # true|false or nil (undef)
+      x_ascii_only      = response._text_ascii_only
+      x_8bit            = response._text_8bit
+      x_utf8_replace    = response._text_utf8_replace
     end
 
 
@@ -138,7 +123,6 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
 
 
 
-    File.open( meta_path, 'w:utf-8' ) do |f|
       ## todo/check:
       ##  do headers also need to converted (like text) if encoding is NOT utf-8 ???
 
@@ -151,28 +135,29 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
 
       ### start w/ comment line
       ###   uncomment - http status - why? why not?
-      f.write( "# fetched on #{Time.now.utc}\n")
-      f.write( "# HTTP/#{response.status.http_version} #{response.status.code} #{response.status.message}\n")
-      f.write( "\n" )
+      buf = String.new
+      buf << "# fetched on #{Time.now.utc}\n"
+      buf << "# HTTP/#{response.version} #{response.status.code} #{response.status.message}\n"
+      buf << "\n"
 
-      f.write( "x-url: #{url}\n" )
-      f.write( "x-encoding-bom: #{x_encoding_bom}\n" )      if x_encoding_bom
-      f.write( "x-encoding: #{x_encoding}\n" )              if x_encoding
-      f.write( "x-encoding-valid: #{x_encoding_valid}\n" )  if x_encoding_valid
-      f.write( "x-ascii-only: #{x_ascii_only}\n" )          if x_ascii_only
-      f.write( "x-8bit: #{x_8bit}\n" )                      if x_8bit
-      f.write( "x-save: #{save_path}\n" )
-      f.write( "x-size: #{x_size}\n")
-      f.write( "x-format: #{format}\n" )     ## e.g. json|html|csv|etc.
-      f.write( "\n" )
-
+      buf << "x-url: #{url}\n"
+      buf << "x-encoding: #{x_encoding}\n"                 if x_encoding
+      buf << "x-encoding-source: #{x_encoding_source}\n"   if x_encoding_source
+      buf << "x-encoding-valid: #{x_encoding_valid}\n"     if x_encoding_valid
+      buf << "x-ascii-only: #{x_ascii_only}\n"             if x_ascii_only
+      buf << "x-8bit: #{x_8bit}\n"                         if x_8bit
+      buf << "x-utf8-replace: #{x_utf8_replace}\n"         if x_utf8_replace
+      buf << "x-save: #{save_path}\n"
+      buf << "x-size: #{x_size}\n"
+      buf << "x-format: #{format}\n"      ## e.g. json|html|csv|etc.
+      buf << "\n"
 
       # iterate all response headers
       response.headers.each do |key, value|
-        f.write( "#{key}: #{value}" )
-        f.write( "\n" )
+        buf << "#{key}: #{value}\n"
       end
-    end
+
+      _write_utf8( meta_path, buf )
   end
 
 
@@ -183,7 +168,7 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
 
 
   ### helpers
-  def url_to_path( str, path: nil )
+  def url_to_path( str )
     ## map url to file path
     uri = URI( str )       ## URI() same as URI.parse()
 
@@ -192,18 +177,30 @@ class DiskCache     ### todo/check - change to Disk - why? why not?
     ##    always downcase for now (internet domain is case insensitive)
     host_dir = uri.host.downcase
 
-    req_path = if path   ## use "custom" (file)path for cache storage if passed in
-                 path
-               else
-                 ## "/this/is/everything?query=params"
-                 ##   cut-off leading slash and
-                 ##    convert query ? =
-                 rewrite_path( host_dir, uri.request_uri[1..-1] )
-               end
+    ## "/this/is/everything?query=params"
+    ##   cut-off leading slash and
+    ##    convert query ? =
+    req_path =   rewrite_path( host_dir, uri.request_uri[1..-1] )
 
 
     page_path = "#{host_dir}/#{req_path}"
     page_path
+  end
+
+
+  def _read_utf8( path )
+    File.open( path, 'r:utf-8' ) {|f| f.read }
+  end
+
+  def _write_utf8( path, text )
+     ##  write out utf8 (always use "universal" newlines on any platform)
+     ##    todo / fix -   add  universial or such to open too ??
+     ##
+     ## fix: newlines - always use "unix" style" - why? why not?
+     ## fix:  use :newline => :universal option? translates to univeral "\n"
+
+    text  = text.gsub( "\r\n", "\n" )
+    File.open( path, 'w:utf-8' ) {|f| f.write( text ) }
   end
 end # class DiskCache
 

@@ -65,14 +65,10 @@ module Webcache
  ### "interface" for "generic" cache storage (might be sqlite database or filesystem)
  def self.cache() @cache ||= DiskCache.new; end
 
- def self.record( url, response,
-                   path: nil,
-                   encoding: 'UTF-8',
-                   format: 'html' )
-   cache.record( url, response,
-                   path: path,
-                   encoding: encoding,
-                   format: format );
+ def self.record( url, response, format: )  ## html|txt|csv|json|etc.
+  ##  note - (text) encoding_user MUST get passed along in response obj/wrapper
+  ##            response._encoding_user = encoding! !!
+   cache.record( url, response, format: format );
  end
 
  def self.cached?( url ) cache.cached?( url ); end

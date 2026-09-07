@@ -71,7 +71,7 @@ puts res.text( encoding: 'Windows-1252' )
 
 
 url = 'https://rsssf.org/tablesa/aus2025.html'
-res = Webget.page( url )
+res = Webget.page( url, encoding: 'Windows-1252' )
 puts res.status.code       #=> 200
 puts res.status.message    #=> OK
 puts res.status.ok?

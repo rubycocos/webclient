@@ -70,6 +70,15 @@ private
       self.basename = File.basename( path, File.extname( path ))   if basename.nil?
       self.extname  = File.extname( path )                         if extname.nil?
       self.dirname  = File.dirname( path )                         if dirname.nil?
+
+
+      ###
+      ##  always downcase extname - why? why not?
+      ##    possibly .HTM or .HTML (or even .Html or such)
+      ##   or change to
+      ##      autofill format field with   'html' or such - why? why not?
+      ##
+
    end
 end # class Page
 
