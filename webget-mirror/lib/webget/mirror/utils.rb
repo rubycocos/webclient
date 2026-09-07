@@ -31,7 +31,7 @@ HTML_CHARSET_RE = %r{
   \bcharset
         [ ]*=[ ]*
           ['"]?       ## optional opening quote
-        (?<charset>[a-z0-9-]+)
+        (?<charset>[a-z0-9_-]+)
 }ix
 
 

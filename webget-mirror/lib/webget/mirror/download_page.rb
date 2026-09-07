@@ -1,6 +1,9 @@
 
 
 
+##
+##  change  params to encoding: nil, force: false  defaults !!!
+
 def _download_page( url,
                     encoding:,
                     force: )
@@ -42,7 +45,7 @@ def _download_page( url,
 
     elsif response.status.code == 200
       puts "html:"
-      html =  response.text( encoding: encoding )
+      html =  response.text
       pp html[0..200]
 
       ## note - use "hacky" undocument internal response._text_encoding
@@ -50,10 +53,13 @@ def _download_page( url,
       ##                         unicode boms may override user supplied encoding!!!
       ##  or change upstream
       ##   and    use/add response.text_with_encoding( ) - why? why not?
+      ##   yes, upstream now uses
+      ##    text( encoding: _encoding_user )!!!
 
       meta = {
           encoding:         response._text_encoding,
-          ##  encoding_source:  '?',   ## fix -   bom|http|html|user - add fallback too?
+          encoding_source:  response._text_encoding_source,  ## bom|http|html|user|fallback
+
           content_length:  response.content_length,
           content_type:    response.content_type,
           status:          response.status.code,

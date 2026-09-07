@@ -17,4 +17,4 @@ more / classic / "legacy"
 ## License
 
 The scripts are dedicated to the public domain.
-Use it as you please with no restrictions whatsoever.
+Use as you please with no restrictions whatsoever.

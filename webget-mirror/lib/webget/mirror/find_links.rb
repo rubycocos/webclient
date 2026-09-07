@@ -35,14 +35,20 @@ def _find_links( site:,
     ##    if no href in a - nokigiri return nil
     ##
     ##     might still incl. empty string ("") - remove too - why? why not?
+
+    ##
+    ##  fix - change to css('a[href]') or such ??
+    ###     document.css("a[href]").each do |a|
     links = doc.css('a').map { |a| a['href'] }.compact
+
 
     ## split into internal & external
     ## make links absolute
 
-    anchors = []
-    pages = []
+    anchors   = []
+    pages     = []
     externals = []
+
     links.each do |href|
 
                     ## strip leading & trailing spaces e.g.

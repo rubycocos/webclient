@@ -190,6 +190,17 @@ def _mirror_pages( site:,
 
            doc = Nokogiri::HTML( html )
 
+
+
+           ## use collect_page_stat( doc: )
+           ##   or   collect_page_info  ( pass in nokogiri doc !!)
+           ##     PageInfo   (or Page::Info), PageStat
+           ##       - title
+           ##       - html_doctype
+           ##       - html_charset
+           ##       - tabs
+           ##       ...
+
            ### try to find page title
            ##    not - title might be missing (nil)!!
              title_el =  doc.at_css('title')
@@ -211,8 +222,8 @@ def _mirror_pages( site:,
              ###
              ## fix-fix-fix   limit search to 1024 ( or allow double 2048)
 
-             html_doctype =  (m=HTML_DOCTYPE_RE.match( html )) ? m[:doctype] : nil
-             html_charset =  (m=HTML_CHARSET_RE.match( html )) ? m[:charset] : nil
+             html_doctype =  (m=HTML_DOCTYPE_RE.match( html[0,1024] )) ? m[:doctype] : nil
+             html_charset =  (m=HTML_CHARSET_RE.match( html[0,1024] )) ? m[:charset] : nil
 
 
              ## check for tabs  - make it nil if no tabs found otherwise use count
@@ -265,6 +276,7 @@ def _mirror_pages( site:,
             ## check for encoding when fresh download (via response meta data)
             if response_meta
                encoding = response_meta[:encoding]
+               ## add encoding_source etc.
 
                attribs[ :encoding ] = encoding.downcase   if encoding
             end
