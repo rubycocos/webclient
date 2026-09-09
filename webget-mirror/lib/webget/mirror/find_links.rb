@@ -91,8 +91,14 @@ def _find_links( site:,
                       begin
                         ## try to make absolute (relative to base_url)
                         page_url = URI.join(base_url, href)
+
+                        ###  note - skip any other schemes (ftp? or ??)
+                        ##           not already excluded above
+                        next  unless %w[http https].include?(page_url.scheme)
+
                       rescue => ex
                          ## skip bad urls and log
+                         ###    only catch URI::InvalidURIError - why? why not?
 
                          msg = "bad url in #{base_url.path}:\n#{href}\nex:#{ex}\n"
 
@@ -108,6 +114,7 @@ def _find_links( site:,
                       ##
                       ##  use downcase (case insensitive) for edge case
                       ##     RSSSF.ORG == rsssf.org or such  - why? why not?
+                      ##  note - yes, .host is ALWAYS downcased by URI#host !!!!
 
                       if page_url.host == site.host    ## e.g. 'rsssf.org'
                           if page_url.path == base_url.path

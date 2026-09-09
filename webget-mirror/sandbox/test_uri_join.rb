@@ -91,4 +91,38 @@ pp URI.join(URI("https://my-site.com"), URI("//example.com/foo"))
        ##                 end
 
 
+
+=begin
+
+Yes — Ruby's URI parser normalizes the hostname to lowercase.
+
+For example:
+
+URI("https://RSSSF.ORG/foo").host
+# => "rsssf.org"
+
+And:
+
+uri = URI("https://RSSSF.ORG/foo")
+uri.host
+# => "rsssf.org"
+
+uri.to_s
+# => "https://RSSSF.ORG/foo"
+
+So there are two slightly different things happening:
+
+- uri.host → normalized/lowercase
+- the original URI string → Ruby generally retains the original casing when serialized
+
+This is desirable because DNS hostnames are case-insensitive:
+
+RSSSF.ORG
+rsssf.org
+Rsssf.Org
+
+all identify the same hostname.
+=end
+
+
 puts "bye"
