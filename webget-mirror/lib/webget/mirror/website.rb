@@ -1,5 +1,8 @@
 
-module Mirror
+class Webget
+  class Mirror
+
+
 class Website
   def host
      raise ArgumentError, "website.base_url not set"   if @base_url.nil?
@@ -96,9 +99,6 @@ class Website
 
   def errata_edits=(edits)  @errata_edits = edits; end
 
-
-
-
   ### quick fix html w/ search & replace
   ##    default: do nothing
   def errata?()   defined?( @errata_edits ); end
@@ -126,10 +126,19 @@ class Website
   end
 
 
+  def autofix_href=( m )
+       raise ArgumentError,
+               "proc expected for autofix_href=; got #{m} #{m.class.name}"   unless m.is_a?( Proc )
+
+       @autofix_href = m
+  end
+  def autofix_href()  defined?( @autofix_href ) ? @autofix_href : nil; end
 
 
 
-  def mirror_pages
+  ### kick-off mirror (pages) operation/run
+  def mirror
+
 
     ## add seed/start pages
     start_pages.each do |config|
@@ -146,8 +155,50 @@ class Website
                 end
       pp page_rec
 
-      _mirror_pages( site: self )
+
+
+      ## fix-fix-fix use Mirror.new( self )
+      ##         pass in site config on new!!!
+      mirror = Mirror.new
+      mirror._mirror_pages( site: self )
     end
   end
 end  # class Website
-end  ## module Mirror
+end  ## class Mirror
+end  ## class Webget
+
+
+
+
+__END__
+
+
+=begin
+module Mirror
+  class Configuration
+     def host() @base_url.host; end
+
+     def base_url
+        raise ArgumentError, "config.base_url not set"   if @base_url.nil?
+        @base_url
+     end
+     def base_url=( url )
+        @base_url = URI( url )   ## note URI() same as URI.parse()
+     end
+  end # class Configuration
+
+
+ ## lets you use
+ ##   Webcache.configure do |config|
+ ##      config.root = './cache'
+ ##   end
+ def self.configure() yield( config ); end
+ def self.config()    @config ||= Configuration.new;  end
+
+
+ ## add "high level" root convenience helpers
+ ##   use delegate helper - why? why not?
+ ## def self.host()       config.host; end
+ ## def self.host=(value) config.host = value; end
+end   # module Mirror
+=end

@@ -1,5 +1,9 @@
 
 
+class Webget
+  class Mirror
+
+
 ###
 # fix-fix-fix
 #    make regex more "generic"
@@ -97,3 +101,7 @@ def _collect_page_info( doc, html: )
 
    meta
 end
+
+
+end  ## class Mirror
+end  ## class Webget

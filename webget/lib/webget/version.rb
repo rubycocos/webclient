@@ -17,4 +17,4 @@ class Webget
   def self.root
     File.expand_path( File.dirname(File.dirname(File.dirname(__FILE__))) )
   end
-end  # module Webget
+end  # class Webget

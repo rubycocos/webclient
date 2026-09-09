@@ -8,6 +8,8 @@ visited: 100 (downloaded: 98) -  35586 page(s) indexed (9158 cached, 26428 missi
 =end
 
 
+class Webget
+  class Mirror
 
 ##
 ##  use limit for batch - why? why not?
@@ -238,3 +240,7 @@ def _mirror_pages( site:,
                  "(#{MirrorDb::Model::Page.cached.count} cached, " +
                  "#{MirrorDb::Model::Page.not_cached.count} missing)"
 end
+
+
+end  ## class Mirror
+end  ## class Webget

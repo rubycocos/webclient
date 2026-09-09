@@ -9,37 +9,8 @@ require 'nokogiri'
 require 'active_record'   ## todo: add sqlite3? etc.
 
 
-
-=begin
-module Mirror
-  class Configuration
-     def host() @base_url.host; end
-
-     def base_url
-        raise ArgumentError, "config.base_url not set"   if @base_url.nil?
-        @base_url
-     end
-     def base_url=( url )
-        @base_url = URI( url )   ## note URI() same as URI.parse()
-     end
-  end # class Configuration
-
-
- ## lets you use
- ##   Webcache.configure do |config|
- ##      config.root = './cache'
- ##   end
- def self.configure() yield( config ); end
- def self.config()    @config ||= Configuration.new;  end
-
-
- ## add "high level" root convenience helpers
- ##   use delegate helper - why? why not?
- ## def self.host()       config.host; end
- ## def self.host=(value) config.host = value; end
-end   # module Mirror
-=end
-
+### our own
+require_relative 'mirror/version'     ## version first
 
 require_relative 'mirror/database/schema'
 require_relative 'mirror/database/models'
@@ -61,6 +32,9 @@ require_relative 'mirror/website'
 
 
 
+class Webget
+  class Mirror
+
 ## auto log errors  (append to logs.txt)
 def log( msg )
    ## append msg to ./logs.txt
@@ -70,3 +44,12 @@ def log( msg )
      f.write( "\n" )
    end
 end
+
+end  ## class Mirror
+end  ## class Webget
+
+
+
+
+
+puts Webget::Mirror.banner    ## say hello

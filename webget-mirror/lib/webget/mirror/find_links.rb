@@ -1,6 +1,7 @@
 
 
-
+class Webget
+  class Mirror
 
 
    ## double assert
@@ -51,26 +52,24 @@ def _find_links( site:,
     ## links = doc.css('a').map { |a| a['href'] }.compact
 
 
-    links = doc.css('a[href]').map do |a|
-
+    links = doc.css( 'a[href]' ).map do |a|
                     ## strip leading & trailing spaces e.g.
                     ##   "http://www.danskfodbold.dk "
                     ##    is invalid url!!!
-                    href = a['href'].strip
-
+                    a['href'].strip
+                end.reject do |href|
                     # skip
                     #  - empty strings,
-                    #  - page anchors, or
-                    #  - javascript snippets
-                    next if href.empty? || href.start_with?('#')
+                    #  - page anchors
+                    href.empty? || href.start_with?('#') ||
 
-                      ## note - skip mailto links
-                    next if href.match?( /\A(?:mailto|javascript)/i )
+                    ##  skip mailto links/javascript snippets
+                    href.match?( /\A(?:mailto|javascript)/i ) ||
 
-                   ## also skip broken mailto links
-                   ##   that is, missing mailto
-                   ##  e.g.
-                   next if href.include?( '@' )
+                     ## also skip broken mailto links
+                     ##   that is, missing mailto
+                     ##  e.g.
+                     href.include?( '@' )
                 end
 
 
@@ -99,6 +98,32 @@ def _find_links( site:,
                         ##        only works properly with triple ///
                         ##             e.g. ///hello.html
                         ##              now host is nil, and path is /hello.html
+
+      ##   URI.join(URI("https://example.com/page.html"), "//cdn.example.com/file.js")
+      ##  # => #<URI::HTTPS https://cdn.example.com/file.js>  ✓ Works!
+      ##
+      ##   But with just the string:
+      ##    URI("//cdn.example.com/file.js")
+      ##     Parses incorrectly—no scheme, treats cdn.example.com as host  !!!!!
+
+
+       ##  The browser breaks down //path/page.html like this:
+       ##  - Protocol: Inherited from the current page (e.g., https:).
+       ##  - Domain (Authority): path
+       ##  - File Path: /page.html
+       ##
+       ## If your website is hosted on https://example.com and
+       ## a user clicks <a href="//path/page.html">, the browser will try
+       ## to navigate to https://path/page.html.
+       ## Unless you own a domain name that is literally just path,
+       ##  this will result in a "Site cannot be reached" error.
+       ###
+       ###  "legacy" protocol relative is "//://" !!!!
+       ##
+       ##   move notes from here to dedicated notes page!!
+
+
+
                         if href.start_with?("//")
                            puts "!!! debug break on href starting with //:"
                            pp  href
@@ -191,3 +216,7 @@ def _find_links( site:,
 
     [pages, externals]
 end
+
+
+end  ## class Mirror
+end  ## class Webget

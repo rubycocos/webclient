@@ -1,5 +1,8 @@
 
 
+class Webget
+  class Mirror
+
 
 def _download_page( url,
                     encoding: nil,
@@ -74,3 +77,7 @@ def _download_page( url,
        exit 1
     end
 end
+
+
+end ## class Mirror
+end ## class Webget

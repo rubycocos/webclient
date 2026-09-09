@@ -1,6 +1,7 @@
 
 
-
+class Webget
+  class Mirror
 
 
 
@@ -25,3 +26,7 @@ def fmt_time_diff( time_start, time_end=Time.now, count:, step: nil )
 
    buf
 end
+
+
+end  ## class Mirror
+end  ## class Webget
