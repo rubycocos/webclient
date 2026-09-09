@@ -75,17 +75,6 @@ def _mirror_pages( site:,
          ##           might be get changed
          ##        ALWAYS use updated encoding!!
 
-         ##
-         ## note - workaround for windows
-         ##     on windows File.exist? (and Webcache.cached?)
-         ##          is case-insensitive
-         ##    e.g. /USAdave/ is the same as /usadave/
-         ##
-         ##   as a workaround ALWAYS hardcode 404
-         ##    for /USAdave/    to get (and record) 404  (and not CACHE HITS!!)
-         ##   e.g. try https://rsssf.org/USAdave/cncc.html  => 404 (NOT FOUND)
-         ##            https://rsssf.org/usadave/cncc.html  => 200 (OK)
-
 
          ##  note - url e.g. https://rsssf.org
          ##         path MUST start with /  e.g.  /curtour.html
@@ -93,13 +82,9 @@ def _mirror_pages( site:,
 
          url = site.base_url+page_rec.path
 
-        ## if %r{/USAdave/}.match?(page_rec.path)
-        ##                                 ['', {status: 404}]
 
-
-
-  ## check if not in cache
-  ##   note - use force == true  to always (force) download
+     ## check if not in cache
+     ##   note - use force == true  to always (force) download
 
           html, response_meta = _download_page( url,
                                                 encoding: page_rec.encoding,

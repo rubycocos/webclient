@@ -64,7 +64,7 @@ def _find_links( site:,
                     href.empty? || href.start_with?('#') ||
 
                     ##  skip mailto links/javascript snippets
-                    href.match?( /\A(?:mailto|javascript)/i ) ||
+                    href.match?( /\A(?:javascript|mailto|tel|data):/i ) ||
 
                      ## also skip broken mailto links
                      ##   that is, missing mailto
@@ -84,67 +84,13 @@ def _find_links( site:,
 
         ##
         ## auto-fix ("site-wide") known quirks:
-        href = site.autofix_href.call( href )    if  site.autofix_href.is_a?( Proc )
+        href = site.autofix_href.call( href )    if site.autofix_href.is_a?( Proc )
 
 
                       page_url = nil
                       begin
-
-                        ## special case
-                        ##  check for protocol-relative  //  e.g. //hello.html
-                        ##    NOT handled by URI
-                        ##       URI makes hello.html into host !!!
-                        ##                host is hello.html and path is nil
-                        ##        only works properly with triple ///
-                        ##             e.g. ///hello.html
-                        ##              now host is nil, and path is /hello.html
-
-      ##   URI.join(URI("https://example.com/page.html"), "//cdn.example.com/file.js")
-      ##  # => #<URI::HTTPS https://cdn.example.com/file.js>  ✓ Works!
-      ##
-      ##   But with just the string:
-      ##    URI("//cdn.example.com/file.js")
-      ##     Parses incorrectly—no scheme, treats cdn.example.com as host  !!!!!
-
-
-       ##  The browser breaks down //path/page.html like this:
-       ##  - Protocol: Inherited from the current page (e.g., https:).
-       ##  - Domain (Authority): path
-       ##  - File Path: /page.html
-       ##
-       ## If your website is hosted on https://example.com and
-       ## a user clicks <a href="//path/page.html">, the browser will try
-       ## to navigate to https://path/page.html.
-       ## Unless you own a domain name that is literally just path,
-       ##  this will result in a "Site cannot be reached" error.
-       ###
-       ###  "legacy" protocol relative is "//://" !!!!
-       ##
-       ##   move notes from here to dedicated notes page!!
-
-
-
-                        if href.start_with?("//")
-                           puts "!!! debug break on href starting with //:"
-                           pp  href
-                           pp  url
-                           pp  base_url
-                           exit 1
-                        end
-
-
-
-                        ## check if href is absolute?
-                        href_url = URI( href )
-
-                        ## assume already absolute
-                        if href_url.scheme && href_url.host
-                          page_url = href_url
-                        else
-                          ## try to make absolute (relative to base_url)
-                          page_url = URI.join(base_url, href_url)
-                        end
-
+                        ## try to make absolute (relative to base_url)
+                        page_url = URI.join(base_url, href)
                       rescue => ex
                          ## skip bad urls and log
 
@@ -159,12 +105,9 @@ def _find_links( site:,
                          next
                       end
 
-                      ###
-                      ##  fix-fix-fix
-                      ##    check for  optional www too
-                      ##          assume same for now ??
-                      ##    or better add to autofix
-                      ##            if www.rsssf.org  change to  rsssf.org
+                      ##
+                      ##  use downcase (case insensitive) for edge case
+                      ##     RSSSF.ORG == rsssf.org or such  - why? why not?
 
                       if page_url.host == site.host    ## e.g. 'rsssf.org'
                           if page_url.path == base_url.path
