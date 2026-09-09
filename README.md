@@ -5,6 +5,7 @@ Gems:
 
 - [webclient](webclient) - yet (another) universal network client interface for world wide web (www) requests via HTTP
 - [webget](webget) - a web (go get) crawler incl. web cache
+- [webget-mirror](webget-mirror) - a webget addon to mirror website
 
 
 more / classic / "legacy"

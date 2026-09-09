@@ -1,0 +1,16 @@
+CHANGELOG.md
+Manifest.txt
+README.md
+Rakefile
+lib/webget-mirror.rb
+lib/webget/mirror.rb
+lib/webget/mirror/collect_page_info.rb
+lib/webget/mirror/database/models.rb
+lib/webget/mirror/database/open.rb
+lib/webget/mirror/database/schema.rb
+lib/webget/mirror/download_page.rb
+lib/webget/mirror/find_links.rb
+lib/webget/mirror/mirror.rb
+lib/webget/mirror/utils.rb
+lib/webget/mirror/version.rb
+lib/webget/mirror/website.rb

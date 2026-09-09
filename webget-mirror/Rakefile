@@ -1,0 +1,34 @@
+require 'hoe'
+require './lib/webget/mirror/version.rb'
+
+Hoe.spec 'webget-mirror' do
+
+  self.version = Webget::Mirror::VERSION
+
+  self.summary = 'webget-mirror gem - addon to webget to mirror websites'
+  self.description = summary
+
+  self.urls    = { home: 'https://github.com/rubycocos/webclient' }
+
+  self.author  = 'Gerald Bauer'
+  self.email   = 'gerald.bauer@gmail.com'
+
+  # switch extension to .markdown for gihub formatting
+  self.readme_file  = 'README.md'
+  self.history_file = 'CHANGELOG.md'
+
+  self.extra_deps = [
+    ['webget', ],
+    ['nokogiri'],
+    ['activerecord'],
+    ['sqlite3'],
+  ]
+
+
+  self.licenses = ['Public Domain']
+
+  self.spec_extras = {
+   required_ruby_version: '>= 3.1.0'
+  }
+
+end
