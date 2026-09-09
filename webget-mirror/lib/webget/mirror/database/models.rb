@@ -31,24 +31,29 @@ class Page < ActiveRecord::Base
    def incoming_paths() backlink_pages.pluck(:path); end
 
 
-   scope  :cached, -> { where( cached: true ) }
    ## find a better name for not cached (was missing)? why? why not?
+   ##   cached a.k.a. downloaded to local cache
+   scope  :cached,     -> { where( cached: true ) }
    scope  :not_cached, -> { where( cached: false ) }
 
    ## 404 not_found
    scope  :not_found,  -> { where( http_status: 404 ) }
+   ##
+   ## add scope  :ok  for 200  - why ? why not?
 
 
    ## for extname (file extensions)
    ##   note - .html auto incl .htm !!
    scope  :html,  -> { where( extname: ['.html', '.htm']) }
-   scope  :pdf,   -> { where( extname: 'pdf') }
+   scope  :pdf,   -> { where( extname: '.pdf') }
 
-   def html?()  extname == '.html' || extname == '.htm';  end
-   def pdf?()   extname == '.pdf'; end
+   def html?()      extname == '.html' || extname == '.htm';  end
+   def not_html?()  !html?();  end
+   def pdf?()       extname == '.pdf'; end
 
-   def not_cached?()  !cached?(); end
+
    def not_found?()  http_status == 404; end
+   def not_cached?()  !cached?(); end
 
 
     ### note - path incl. leading slash e.g. /curtour.html
@@ -63,7 +68,10 @@ class Page < ActiveRecord::Base
 ##  before_create runs after validation passes
 
    ###  note - use callback to autofill basename,extname, dirname from path
-   before_create :autofill
+   before_validation :autofill
+
+   ## double check added path
+   validate :assert_path
 
 private
    def autofill
@@ -71,16 +79,34 @@ private
       self.extname  = File.extname( path )                         if extname.nil?
       self.dirname  = File.dirname( path )                         if dirname.nil?
 
-
       ###
-      ##  always downcase extname - why? why not?
+      ##  note -  always downcase extname for now - why? why not?
       ##    possibly .HTM or .HTML (or even .Html or such)
-      ##   or change to
-      ##      autofill format field with   'html' or such - why? why not?
       ##
+      ##  maybe latter autofill format or such - why? why not?
+      self.extname = extname.downcase       if extname
+   end
+
+   def assert_path
+         ## assert - double check
+          ## make sure url.path does NOT start with // or
+          ##                              /// !!
+         ##  and does NOT end_with /
+         ##
+         ##                page_rec.path.include?( %r{/{2,}} ) ||
+         ##   fix  http.//  typos!!!
+         ##      page_rec.path.match?( %r{\.{2,}} )
+         ##   fix ..sources typos ...
+         ##    pages
+           if  path.start_with?( '//' ) ||
+               path.end_with?( '/' )  ||
+              !path.start_with?( '/' )  ## note - MUST start with single slash (/)
+                errors.add(:path, "broken; starts with // or ends with /")
+           end
 
    end
 end # class Page
+
 
 
 
@@ -94,4 +120,4 @@ end # class Link
 
 
 end   # module Model
-end
+end  # module MirrorDb

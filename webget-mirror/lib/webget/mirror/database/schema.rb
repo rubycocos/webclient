@@ -14,7 +14,7 @@ create_table :pages do |t|
    t.string :dirname,  null: false
    t.string :extname,  null: false    ##  note - empty string if no extname?
                                       ##    if present starts with dot (.) e.g.
-                                      ##          .html, .pdf, etc.
+                                      ##          .html|.htm, .pdf, etc.
                                       ##   keep dot why? why not?
 
    t.string :title          ##   html <title></title>
@@ -22,7 +22,8 @@ create_table :pages do |t|
 
    ################
    ### add (charset) encoding stuff
-   t.string  :encoding           ## "upstream" text encoding - all pages converted to utf-8 ALWAYS
+   t.string  :encoding           ## "upstream" text encoding
+                                 ##   all pages ALWAYS converted to utf-8
    t.string  :encoding_source   ## e.g. bom|http|html|user|fallback
 
    t.boolean :encoding_valid  ## uses  String#encoding_valid?
@@ -64,68 +65,3 @@ add_index :links, :to_page_id
 end # method up
 end # class CreateDb
 end # module MirrorDb
-
-
-
-
-module MirrorDb
-    def self.open( path='./mirror.db' )
-
-      ### reuse connect here !!!
-      ###   why? why not?
-
-      config = {
-          adapter:  'sqlite3',
-          database: path,
-      }
-
-      ActiveRecord::Base.establish_connection( config )
-      # ActiveRecord::Base.logger = Logger.new( STDOUT )
-
-        ## try to speed up sqlite
-        ##   see http://www.sqlite.org/pragma.html
-        con = ActiveRecord::Base.connection
-        con.execute( 'PRAGMA synchronous=OFF;' )
-        con.execute( 'PRAGMA journal_mode=OFF;' )
-        con.execute( 'PRAGMA temp_store=MEMORY;' )
-
-      ##########################
-      ### auto_migrate
-      unless Model::Page.table_exists?
-          CreateDb.new.up
-      end
-    end  # method open
-end
-
-
-
-__END__
-
-
-=begin
-    def self.open_readonly( path='./mirror.db' )
-
-       ### raise ArgumentError, "sqlite db #{path} not found"  if !File.exist?( path )
-
-
-      config = {
-          adapter:  'sqlite3',
-          database: path,
-          readonly: true,   ## try readonly prop!!!
-      }
-
-      ActiveRecord::Base.establish_connection( config )
-      # ActiveRecord::Base.logger = Logger.new( STDOUT )
-
-        ## try to speed up sqlite
-        ##   see http://www.sqlite.org/pragma.html
-        con = ActiveRecord::Base.connection
-
-        ## add for read-only - why? why not?
-       # con.execute( 'PRAGMA query_only=ON;' )
-
-       # con.execute( 'PRAGMA synchronous=OFF;' )
-       # con.execute( 'PRAGMA journal_mode=OFF;' )
-       # con.execute( 'PRAGMA temp_store=MEMORY;' )
-    end
-=end

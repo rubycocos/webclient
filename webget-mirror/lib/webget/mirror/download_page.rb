@@ -1,27 +1,23 @@
 
 
 
-##
-##  change  params to encoding: nil, force: false  defaults !!!
-
 def _download_page( url,
-                    encoding:,
-                    force: )
-
-
-  ## check if not in cache
-  ##   note - use force == true  to always (force) download
+                    encoding: nil,
+                    force: false )
 
 ##
 ## note - on windows cached will be CASE-INSENSITIVE
 ##       e.g. usadave and USAdave will match
 ##    make sure match is CASE-SENSITIVE!!!
 
-    if force == false && Webcache.cached?( url )
-        puts "   CACHE HIT - #{url}"
-        html = Webcache.read( url )
-        [html, nil]
-    else
+          if force == false && Webcache.cached?( url )
+              puts "   CACHE HIT - #{url}"
+              html  = Webcache.read( url )
+
+              return [html,nil]
+          end
+
+
         puts "==> download #{url} (encoding: #{encoding})..."
 
 
@@ -38,7 +34,7 @@ def _download_page( url,
     if response.status.code == 404
 
         meta = {
-           status:          response.status.code,
+           http_status:     response.status.code,
         }
 
         ["404 NOT FOUND",meta]
@@ -56,64 +52,25 @@ def _download_page( url,
       ##   yes, upstream now uses
       ##    text( encoding: _encoding_user )!!!
 
+
       meta = {
           encoding:         response._text_encoding,
           encoding_source:  response._text_encoding_source,  ## bom|http|html|user|fallback
+          encoding_valid:   response._text_encoding_valid,
 
-          content_length:  response.content_length,
-          content_type:    response.content_type,
-          status:          response.status.code,
+          ascii7bit:         response._text_ascii_only,
+          chars_8bit:        response._text_8bit,
+          utf8_replace:      response._text_utf8_replace,
+
+          http_content_type:     response.content_type,
+          http_content_length:   response.content_length,
+          http_status:           response.status.code,
       }
 
         [html,meta]
 
     else
-       puts "unexpected http status code - #{response.status.code}"
+       puts "unexpected http status (code) - #{response.status}"
        exit 1
     end
-  end
 end
-
-
-
-__END__
-
-TITLE_RE = %r{
-    <TITLE>(?<text>.*?)</TITLE>
-}ixm
-
-
-
-https://rsssf.org/miscellaneous/ec-qual.html
-
-minimal page with no title   uses <head/> !!!
-e.g
-<html>
-<head/><pre>
-Contributed by ...
-</pre>
-</html>
-
-
-if encoding == 'windows-1252'
-            ## try a quick check if proper encoding
-            ## search for title in page
-           if  m=TITLE_RE.match( html )
-              puts "  page title: #{m[:text].strip}"
-           else
-             puts "error - no title found in html - encoding error?"
-             exit 1
-           end
-        end
-
-or
-
-
-<head/><pre>
-Austria, OeFB ("Magnofit") Cup 1996/97
-  ...
-<p>
-Last updated: 28 May 1997
-
-</pre>
-  in https://rsssf.org/tableso/oostcup97.html

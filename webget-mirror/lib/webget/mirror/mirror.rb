@@ -22,66 +22,35 @@ def _mirror_pages( site:,
     time_start = Time.now
 
     loop do
-      ## todo - add
-       ##       prefer pages
-       ##  starting with /tables,/tables[a-z]/
-       ##    - add to select
-       ## prefer pages
-       ##    starting with /tables,/tables[a-z]/
-       ##
-       ##   queue.keys.find do |key|
-       ##                       %{\A/tables[a-z]?/}.match?(key)
-       ##                 end
 
-       ##   prioritize main pages
-       ##     fix - pass in via seed / use seed !!!
+       ## (i)  prioritize main pages (e.g. use start_pages_path)
        ## /curdom.html
        ## /curtour.html
        ## /histdom.html
        ## /intclub.html
        ## /intland.html
-
-=begin
-  build path [] from start_pages!! e.g.
-                                            path: ['/curdom.html',
-                                                       '/curtour.html',
-                                                        '/histdom.html',
-                                                        '/intclub.html',
-                                                        '/intland.html']
-=end
-     ### todo - move into website config
-     ##                 use start_path - why? why not?
-       start_path = []
-       site.start_pages.each do |config|
-          start_path << config['page']
-       end
-
-
       page_recs =  MirrorDb::Model::Page.where( cached: false,
-                                                path:   start_path
+                                                path:   site.start_pages_path
                                                ).limit( batch )
 
-       ## note - sql (like) wildcard rules/syntax:
-       ##      %: Matches zero or more characters
-       ##      _: Matches exactly one character
 
-       ##
-       ## todo - add/move to website config
-       #             use   path_like  or such
-       #                path_like  ??
-
-      if page_recs.size == 0
+      ##  (ii)   prefer pages   (e.g. use boost_pages_path_like)
+      ##  starting with /tables,/tables[a-z]/
+      if page_recs.size == 0 && site.boost_pages_path_like?
         page_recs =  MirrorDb::Model::Page.where( cached: false ).
-                                           where( 'path LIKE ?', '/table%' ).limit( batch )
+                                           where( 'path LIKE ?',
+                                                  site.boost_pages_path_like ).limit( batch )
       end
 
-      if page_recs.size == 0   ## retry if nothing found matching /table*
+      ##  (iii)  retry "unconstrained"  if nothing found matching  (i & ii)
+      if page_recs.size == 0
         page_recs =  MirrorDb::Model::Page.where( cached: false ).limit( batch )
       end
 
 
-      ## break   if visited == batch || page_recs.size == 0
+      ### no more pages - done - break out of loop and say goodbye
       break   if page_recs.size == 0
+
 
 
 
@@ -93,37 +62,16 @@ def _mirror_pages( site:,
 
          ### special case for non .html/.htm pages (e.g. .pdf others too??)
          ##    do NOT download / mirror / cache for now
-         if !['.html', '.htm'].include?( page_rec.extname.downcase )
+         if page_rec.not_html?
             page_rec.update!( cached: true )
             next
          end
+
 
          ## note - on download (not if cached)
          ##        encoding
          ##           might be get changed
          ##        ALWAYS use updated encoding!!
-
-         ## todo/fix - move for resuse into
-         ##          assert_page_path or such!!!
-         ## assert - double check
-          ## make sure url.path does NOT start with // or
-          ##                              /// !!
-         ##  and does NOT end_with /
-         ##
-         ##                page_rec.path.include?( %r{/{2,}} ) ||
-         ##   fix  http.//  typos!!!
-         ##      page_rec.path.match?( %r{\.{2,}} )
-         ##   fix ..sources typos ...
-         ##    pages
-           if  page_rec.path.start_with?( '//' ) ||
-               page_rec.path.end_with?( '/' )
-            puts "!! normalized page.path expected - got:"
-            pp page_rec.path
-            pp page_rec
-            exit 1
-           end
-
-
 
          ##
          ## note - workaround for windows
@@ -137,47 +85,42 @@ def _mirror_pages( site:,
          ##            https://rsssf.org/usadave/cncc.html  => 200 (OK)
 
 
+         ##  note - url e.g. https://rsssf.org
+         ##         path MUST start with /  e.g.  /curtour.html
+         ##  resulting in   https://rsssf.org/curtour.html
+
          url = site.base_url+page_rec.path
 
+        ## if %r{/USAdave/}.match?(page_rec.path)
+        ##                                 ['', {status: 404}]
 
-         ###
-         ###  todo - add exclude/exclude_path  to website config
 
 
-         html, response_meta  =  if %r{/USAdave/}.match?(page_rec.path)
-                                         ['', {status: 404}]
-                                  else
-                                       _download_page( url,
-                                             encoding: page_rec.encoding,
-                                            force: force )
-                                  end
+  ## check if not in cache
+  ##   note - use force == true  to always (force) download
 
-         ##  if response meta data present than fresh download (not cached)
-         cached  = response_meta ? false : true
+          html, response_meta = _download_page( url,
+                                                encoding: page_rec.encoding,
+                                                force:    force  )
 
-         if response_meta
-             downloaded += 1
-             puts " ---  " + fmt_time_diff( time_start,  count: downloaded )
+          if response_meta
+              downloaded += 1
+              puts " ---  " + fmt_time_diff( time_start,  count: downloaded )
 
-             ###
-             ## special case
-             ##  check for 404 NOT FOUND
-             if response_meta[:status] == 404
+              ###
+              ## special case
+              ##  check for 404 NOT FOUND
+              if response_meta[:http_status] == 404
                       page_rec.update!( http_status: 404,
                                         cached:      true )
 
-               next   ### note - skip further processing on 404 (no links etc.)!!
-             end
-
-         end
-
-
-         ## turn on verbose mode only if page downloaded (not on cache hit)
-         verbose = cached ? false : true
-         ## verbose = true
+                next   ### note - skip further processing on 404 (no links etc.)!!
+              end
+          end
 
 
-          html = site.errata( html, url: url )
+
+          html = site.errata( html, url: url )    if site.errata?
 
 
 
@@ -191,46 +134,18 @@ def _mirror_pages( site:,
            doc = Nokogiri::HTML( html )
 
 
-
-           ## use collect_page_stat( doc: )
-           ##   or   collect_page_info  ( pass in nokogiri doc !!)
-           ##     PageInfo   (or Page::Info), PageStat
-           ##       - title
-           ##       - html_doctype
-           ##       - html_charset
-           ##       - tabs
-           ##       ...
-
-           ### try to find page title
-           ##    not - title might be missing (nil)!!
-             title_el =  doc.at_css('title')
-             title =  title_el ? title_el.text.strip :  nil
-
-             ##
-             ##  note - use "plain-old" regex
-             ##     to get "raw" doctype/charset  from html source
-             ##
-             ## record doctype
-             ##  e.g
-             ##  <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
-             ##  <!DOCTYPE HTML>
-             ## and html charset (inside meta)
-             ##  e.g.
-             ## <meta http-equiv="Content-Type" content="text/html; charset=Windows-1252">
-             ## <meta charset="Windows-1252">
-
-             ###
-             ## fix-fix-fix   limit search to 1024 ( or allow double 2048)
-
-             html_doctype =  (m=HTML_DOCTYPE_RE.match( html[0,1024] )) ? m[:doctype] : nil
-             html_charset =  (m=HTML_CHARSET_RE.match( html[0,1024] )) ? m[:charset] : nil
+           ## get (page meta info)
+           ##   title, tabs (count), html_doctype, html_charset
+            page_info = _collect_page_info( doc, html: html )
 
 
-             ## check for tabs  - make it nil if no tabs found otherwise use count
-             tabs = html.scan( "\t" )
-             tabs =  tabs.size == 0 ? nil : tabs.size
 
+          ##  note - if response meta data present than fresh download (not cached)
+          ##  cached  = response_meta ? false : true
 
+          ## turn on verbose mode only if page downloaded (not on cache hit)
+           verbose = response_meta ? true : false
+          ## verbose = true
 
            internals, _ = _find_links( site: site,
                                        doc: doc,
@@ -245,10 +160,6 @@ def _mirror_pages( site:,
                                                             path: path ) do |rec|
                                     puts "     add linked page #{rec.path}"
 
-                                    ## rec.basename = File.basename( rec.path, File.extname( rec.path ))
-                                    ## rec.extname  = File.extname( rec.path )
-                                    ## rec.dirname  = File.dirname( rec.path )
-
                                     rec.encoding = site.page_encoding( rec.path )
                                     rec.cached   = false
                                  end
@@ -260,25 +171,43 @@ def _mirror_pages( site:,
                                                          to_page_id:   internal_rec.id )
             end
 
-            puts "  [#{i+1}/#{page_recs.size}] update page #{page_rec.path} w/ #{internals.size} page(s) linked - >#{title || 'n/a'}<"
+            puts "  [#{i+1}/#{page_recs.size}] update page #{page_rec.path} w/ #{internals.size} page(s) linked - >#{page_info[:title] || 'n/a'}<"
 
 
+            ###
+            ##  note - remove cached (flag) and replace with http_status => nil|200|404|etc?
+            ##         that is, cached = false  => nil
+            ##                  cached = true   =>  200|404|etc - why? why not??
             attribs = {
                 cached: true
             }
-            ## add (optional) title - might be missing in some pages
-            attribs[ :title]         = title               if title
-            attribs[ :html_doctype]  = html_doctype        if html_doctype
-            attribs[ :html_charset]  = html_charset        if html_charset
-            attribs[ :tabs]          = tabs                if tabs
+            ## add (optional) page_info attribus
+            more_attribs = {
+              title:        page_info[:title], ## note - might be missing (nil) in some pages
+              html_doctype: page_info[:html_doctype],
+              html_charset: page_info[:html_charset],
+              tabs:         page_info[:tabs]
+            }
+            attribs = attribs.merge( more_attribs )
 
 
             ## check for encoding when fresh download (via response meta data)
             if response_meta
-               encoding = response_meta[:encoding]
-               ## add encoding_source etc.
+               more_attribs = {
+                  encoding:        response_meta[:encoding] ? response_meta[:encoding].downcase : nil,
+                  encoding_source: response_meta[:encoding_source],   ## bom|html|http|user|fallback
+                  encoding_valid:  response_meta[:encoding_valid],    ## nil|true|false
 
-               attribs[ :encoding ] = encoding.downcase   if encoding
+                   ascii7bit:         response_meta[:ascii7bit],      ## nil|true|false
+                   ## note - convert 10 - 212=>8, 233=>2  (use only first total count; no details)
+                   chars_8bit:        response_meta[:chars_8bit] ? response_meta[:chars_8bit].to_i(10) : nil,
+                   utf8_replace:      response_meta[:utf8_replace],
+
+                   http_content_type:     response_meta[:http_content_type],
+                   http_content_length:   response_meta[:http_content_length],
+                   http_status:           response_meta[:http_status]
+                }
+               attribs = attribs.merge( more_attribs )
             end
 
 

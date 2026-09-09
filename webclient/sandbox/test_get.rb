@@ -39,10 +39,17 @@ pp res.content_length
 url = 'https://raw.githubusercontent.com/openfootball/football.json/master/2025-26/en.1.json'
 res = Webclient.get( url )
 puts res.status.code       #=> 200
-puts res.status_code
+puts res.status_code       #=> 200
 puts res.status.message    #=> OK
-puts res.status.ok?
-puts res.status == 200
+puts res.status.ok?        #=> true
+puts res.status == 200     #=> true
+puts res.status == "200"   #=> true
+
+puts res.ok?               #=> true
+puts res.status.to_s       #=> "200 OK"
+puts res.status            #=> "200 OK"
+puts res.to_s
+
 puts res.status.success?   ## (200..299)
 puts res.status.redirect?  ## (300..399)
 puts res.status.error?     ## >= 400

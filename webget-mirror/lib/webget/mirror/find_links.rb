@@ -1,6 +1,23 @@
 
 
 
+
+
+   ## double assert
+      ## assert - double check
+          ## make sure url.path does NOT start with // or
+          ##                              /// !!
+         ##  and does NOT end_with /
+         ##    pages
+
+def _broken_path?( path )
+      path.start_with?( '//' ) ||
+      path.end_with?( '/' ) ||
+     !path.start_with?( '/' )  ## note - MUST start with single slash (/)
+end
+
+
+
 ## get all links
 ##   ignore anchor links and
 ##     split into internal and external
@@ -15,19 +32,11 @@ def _find_links( site:,
        base_url = URI( url )
 
 
-      ## double assert
-      ## assert - double check
-          ## make sure url.path does NOT start with // or
-          ##                              /// !!
-         ##  and does NOT end_with /
-         ##    pages
-           if  base_url.path.start_with?( '//' ) ||
-               base_url.path.end_with?( '/' ) ||
-              !base_url.path.start_with?( '/' )   ## note - MUST start with single slash (/)
-            puts "!! normalized base_url.path expected  - got:"
-            pp url
-            pp base_url
-            exit 1
+           if _broken_path?( base_url.path )
+              puts "!! normalized base_url.path expected  - got:"
+              pp url
+              pp base_url
+              exit 1
            end
 
     ##
@@ -39,62 +48,48 @@ def _find_links( site:,
     ##
     ##  fix - change to css('a[href]') or such ??
     ###     document.css("a[href]").each do |a|
-    links = doc.css('a').map { |a| a['href'] }.compact
+    ## links = doc.css('a').map { |a| a['href'] }.compact
+
+
+    links = doc.css('a[href]').map do |a|
+
+                    ## strip leading & trailing spaces e.g.
+                    ##   "http://www.danskfodbold.dk "
+                    ##    is invalid url!!!
+                    href = a['href'].strip
+
+                    # skip
+                    #  - empty strings,
+                    #  - page anchors, or
+                    #  - javascript snippets
+                    next if href.empty? || href.start_with?('#')
+
+                      ## note - skip mailto links
+                    next if href.match?( /\A(?:mailto|javascript)/i )
+
+                   ## also skip broken mailto links
+                   ##   that is, missing mailto
+                   ##  e.g.
+                   next if href.include?( '@' )
+                end
 
 
     ## split into internal & external
     ## make links absolute
+    ##   ignore anchor links (see above)
 
-    anchors   = []
     pages     = []
     externals = []
 
     links.each do |href|
 
-                    ## strip leading & trailing spaces e.g.
-                    ##   "http://www.danskfodbold.dk "
-                    ##    is invalid uri!!!
-
-                    href = href.strip
-
-###
-###
-##     fix - move into site config!!!!
-##            use autofix_href
-##               or  autofix_link or such??
-
-
-##
-## auto-fix ("site-wide") known quirks:
-##   www.rsssf.org/miscellaneous/penalties.html =>
-##               /miscellaneous/penalties.html
-                 href = href.sub( %r{^www.rsssf.org}i, '' )
-##
-##   http.//  => http://
-                 href = href.sub( %r{^http\.//}i, 'http://' )
-##   .html.html  => .html
-##   e.g.  /tablesf/francarib2010.html.html
-##         /tablest/tsje22.html.html
-                 href = href.sub( %r{\.html\.html}i, '.html' )
-
-
-                ###
-                ##  fix - add more to skip
-                ##          e.g. (inline) javascript etc.
-
-              ## note - skip mailto links
-                next   if /\Amailto/i.match?( href )
-
-                ## also skip broken mailto links
-                ##   that is, missing mailto
-                ##  e.g.
-                next   if href.include?( '@' )
-
+        ##
+        ## auto-fix ("site-wide") known quirks:
+        href = site.autofix_href.call( href )    if  site.autofix_href.is_a?( Proc )
 
 
                       page_url = nil
                       begin
-
 
                         ## special case
                         ##  check for protocol-relative  //  e.g. //hello.html
@@ -110,14 +105,6 @@ def _find_links( site:,
                            pp  url
                            pp  base_url
                            exit 1
-                        end
-
-                        ## quick fix for anchors with spaces
-                        ### ex:bad URI(is not URI?): "#Northern Ireland"
-                        if href.start_with?('#')
-                          ###   #Northern Ireland  =>  #Northern-Ireland
-                          ###   #Faroe Islands     =>  #Faroe-Islands
-                          href = href.gsub( ' ', '-' )
                         end
 
 
@@ -147,11 +134,16 @@ def _find_links( site:,
                          next
                       end
 
+                      ###
+                      ##  fix-fix-fix
+                      ##    check for  optional www too
+                      ##          assume same for now ??
+                      ##    or better add to autofix
+                      ##            if www.rsssf.org  change to  rsssf.org
 
                       if page_url.host == site.host    ## e.g. 'rsssf.org'
                           if page_url.path == base_url.path
                                  puts "   anchor  #{href}  =>  #{page_url.fragment}"     if verbose
-                              anchors << page_url.fragment
                           else
                                puts "   internal page  #{href}  =>  #{page_url.path}"     if verbose
 
@@ -167,9 +159,7 @@ def _find_links( site:,
                                    next
                                end
 
-        if   page_url.path.start_with?( '//' ) ||
-             page_url.path.end_with?( '/' ) ||
-            !page_url.path.start_with?( '/' )
+        if _broken_path?( page_url.path )
             puts "!! normalized page_url.path expected - got:"
             pp page_url.path
             pp page_url
@@ -177,7 +167,7 @@ def _find_links( site:,
             pp url
             pp base_url
             exit 1
-           end
+          end
 
                                pages << page_url.path
                           end
@@ -189,15 +179,13 @@ def _find_links( site:,
 
      ## make uniq
      pages     = pages.uniq
-     anchors   = anchors.uniq
      externals = externals.uniq
 
       if verbose
-      puts "   #{pages.size} internal (& #{anchors.size} anchor) & #{externals.size} external link(s) found in #{base_url.path}:"
+      puts "   #{pages.size} internal & #{externals.size} external link(s) found in #{base_url.path}:"
 
 
     pp pages
-    pp anchors
     pp externals
       end
 

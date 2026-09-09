@@ -52,6 +52,12 @@ class Webclient
         @text ||= _decode_text( encoding: encoding )
     end
 
+
+    ##  keep (convenience) to_s (shortcut)
+    ##   e.g.  response.to_s      - why? why not?
+    def to_s()  text;  end
+
+
     ## convenience helper; returns parsed json data; note: always assume utf-8 (text) encoding
     ##   cache returned (parsed) json value - why? why not?
     ##   add :symbolize_keys option - why? why not?

@@ -41,13 +41,17 @@ end   # module Mirror
 =end
 
 
+require_relative 'mirror/database/schema'
+require_relative 'mirror/database/models'
+require_relative 'mirror/database/open'
 
-require_relative 'mirror/database-schema'
-require_relative 'mirror/database-models'
 
 
-require_relative 'mirror/find_links'  ## find_links helper 'n' more
+
 require_relative 'mirror/download_page'
+require_relative 'mirror/find_links'  ## find_links helper 'n' more
+require_relative 'mirror/collect_page_info'
+
 
 require_relative 'mirror/mirror'
 

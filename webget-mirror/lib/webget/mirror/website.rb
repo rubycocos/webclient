@@ -28,6 +28,45 @@ class Website
   end
 
 
+  def start_pages_path
+      ## collect/build path for all start pages
+      ## e.g.  path: ['/curdom.html',
+      ##               '/curtour.html',
+      ##               '/histdom.html',
+      ##               '/intclub.html',
+      ##               '/intland.html']
+      path = []
+      start_pages.each do |config|
+          path << config['page']
+      end
+      path
+  end
+  alias_method :start_path, :start_pages_path
+
+
+  ###
+  ## give preference on schedule next page batch
+  ##          if path matches sql like term/str
+  ##           e.g.  '/table%'
+  ##   => Page.where( 'path LIKE ?', '/table%' )
+  ##
+    ## note - sql (like) wildcard rules/syntax:
+       ##      %: Matches zero or more characters
+       ##      _: Matches exactly one character
+
+
+  def boost_pages_path_like=(str)  @boost = str; end
+  def boost_pages_path_like?() defined?( @boost ); end
+  def boost_pages_path_like()  defined?( @boost ) ? @boost : nil; end
+
+  alias_method :boost_path_like=, :boost_pages_path_like=
+  alias_method :boost_path_like?, :boost_pages_path_like?
+  alias_method :boost_path_like,  :boost_pages_path_like
+
+
+
+
+
   def default_page_encoding=( encoding )
        @default_page_encoding = encoding
   end
@@ -62,6 +101,7 @@ class Website
 
   ### quick fix html w/ search & replace
   ##    default: do nothing
+  def errata?()   defined?( @errata_edits ); end
   def errata( html, url: )
        if defined?( @errata_edits )
 
@@ -100,11 +140,6 @@ class Website
       page_rec = MirrorDb::Model::Page.find_or_create_by!( path: path ) do |rec|
                       ## note - block only called on create (NOT find!!)
                       puts "  add page #{rec.path} (cached: false) to mirror.db"
-
-                      ##  note - handled with before_create autofill
-                      ## rec.basename = File.basename( rec.path, File.extname( rec.path ))
-                      ## rec.extname  = File.extname( rec.path )
-                      ## rec.dirname  = File.dirname( rec.path )
 
                       rec.encoding = encoding
                       rec.cached   = false
