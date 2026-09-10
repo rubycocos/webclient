@@ -84,7 +84,7 @@ def _find_links( site:,
 
         ##
         ## auto-fix ("site-wide") known quirks:
-        href = site.autofix_href.call( href )    if site.autofix_href.is_a?( Proc )
+        href = site.autofix_href( href )    if site.autofix_href?
 
 
                       page_url = nil
@@ -157,11 +157,9 @@ def _find_links( site:,
      externals = externals.uniq
 
       if verbose
-      puts "   #{pages.size} internal & #{externals.size} external link(s) found in #{base_url.path}:"
-
-
-    pp pages
-    pp externals
+        puts "     #{pages.size} internal & #{externals.size} external link(s) found in #{base_url.path}"
+        ## pp pages
+        ## pp externals
       end
 
     [pages, externals]

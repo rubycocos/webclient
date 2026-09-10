@@ -11,6 +11,8 @@ visited: 100 (downloaded: 98) -  35586 page(s) indexed (9158 cached, 26428 missi
 class Webget
   class Mirror
 
+
+
 ##
 ##  use limit for batch - why? why not?
 ##     start of / try a batch of a hundred
@@ -18,14 +20,25 @@ def _mirror_pages( site:,
                    force: false,
                    batch: 1000 )
 
+
     visited    = 0
     downloaded = 0
 
     time_start = Time.now
 
-    loop do
 
-       ## (i)  prioritize main pages (e.g. use start_pages_path)
+    ## add/register control-c interrupt handler
+    stop = false
+    trap('INT') {
+      stop = true
+      puts "\n[STOP] Interrupt received. Wrapping up..."
+    }
+
+
+
+    until stop        ## was: loop do
+
+      ## (i)  prioritize main pages (e.g. use start_pages_path)
        ## /curdom.html
        ## /curtour.html
        ## /histdom.html
@@ -51,12 +64,13 @@ def _mirror_pages( site:,
 
 
       ### no more pages - done - break out of loop and say goodbye
-      break   if page_recs.size == 0
+      break   if page_recs.size == 0 || stop
 
 
 
 
        page_recs.each_with_index do |page_rec,i|
+
 
         ##
         ##  fix-fix-fix  - change to mime type - why? why not?
@@ -215,9 +229,16 @@ def _mirror_pages( site:,
 
 
            end
-       end
+
+           break  if stop    ### check for control-c interrupt
+         end  ##  page_recs.each
     end
 
+
+     if stop
+         puts  "\n...stopped."
+         trap('INT', 'DEFAULT')   # restore default (built-in) ctrl+c handler
+     end
 
 
             puts "\n visited: #{visited} (downloaded: #{downloaded}) - " +
