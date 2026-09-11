@@ -22,7 +22,7 @@ def _download_page( url,
           end
 
 
-        print "==> download #{url} (encoding:  #{encoding}/#{force_encoding})..."
+        puts "==> download #{url} (encoding:  #{encoding}/#{force_encoding})..."
 
 
     ## note: assume plain 7-bit ascii for now

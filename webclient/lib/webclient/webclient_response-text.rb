@@ -320,6 +320,8 @@ instead.
 
      ##  comment out for now - get
      ##    unicode_normalize/normalize.rb:126:in `gsub': invalid byte sequence in UTF-8
+     ##        error caused by wrong encoding (e.g. windows 1252 with char 150 e.g. ())
+     ##   note - keep for now
       text = text.unicode_normalize(:nfc)
 
       text
