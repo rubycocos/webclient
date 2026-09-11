@@ -60,14 +60,20 @@ class Webclient
 
     ## todo/check: rename encoding to html/http-like charset - why? why not?
     ##    or keep encoding as used for ruby's strings
-    def _decode_text( encoding: _encoding_user )
+    def _decode_text( encoding:  _encoding_user,  force_encoding: _encoding_force )
 
-      if encoding.nil?
-        encoding = 'UTF-8'     ### use UTF-8 as fallback (default encoding)
-        encoding_source = 'fallback'
-      else
-        encoding_source = 'user'
-      end
+        if force_encoding
+           encoding = force_encoding
+           encoding_source = 'force'
+        else
+          if encoding.nil?
+             encoding = 'UTF-8'     ### use UTF-8 as fallback (default encoding)
+             encoding_source = 'fallback'
+          else
+             encoding_source = 'user'
+          end
+        end
+
 
 
       # note: Net::HTTP will NOT set encoding UTF-8 etc.
@@ -161,8 +167,10 @@ class Webclient
          ##  note - content_type might return nil (guard with to_s!!)
          ##   maybe use/make into  html? helper like gif? pdf? or such
 
-          if content_type.to_s.match?( %r{text/html}i ) ||
-             content_type.to_s.match?( %r{application/xhtml}i )
+          if encoding_source != 'force' &&
+            (content_type.to_s.match?( %r{text/html}i ) ||
+             content_type.to_s.match?( %r{application/xhtml}i ))
+
 
              if (m = HTML_CHARSET_RE.match( text[0, 1028] ))
                  encoding_html =  m[:charset]

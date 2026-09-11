@@ -86,6 +86,22 @@ class Website
   end
 
 
+  ## or name fix_page_encoding - why? why not?
+  def force_page_encoding=(m)
+     raise ArgumentError,
+         "obj w/ respond_to?(:call) expected for force_page_encoding=; got #{m} #{m.class.name}"   unless m.respond_to?( :call )
+     @force_page_encoding = m
+  end
+
+  ## default page encoding (lookup by path);
+  ##    change to windows-1256 if needed
+  def force_page_encoding( path )
+      ## note - encoding defaults to nil (if nothing set) !!!
+     defined?( @force_page_encoding ) ? @force_page_encoding.call( path ) : nil
+  end
+
+
+
 
   ### maybe support errata_edits via Hash(Table) in the future too - why? why not?
   def errata=(m)
@@ -139,6 +155,8 @@ class Website
                       ## note - block only called on create (NOT find!!)
                       puts "  add page #{rec.path} (cached: false) to mirror.db"
 
+                      ###  fix-fix-fix  - move encoding_user to lookup on demand
+                      ##                     do NOT store in database!!!
                       rec.encoding = encoding
                       rec.cached   = false
                 end

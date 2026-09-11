@@ -6,6 +6,7 @@ class Webget
 
 def _download_page( url,
                     encoding: nil,
+                    force_encoding: nil,
                     force: false )
 
 ##
@@ -21,13 +22,20 @@ def _download_page( url,
           end
 
 
-        puts "==> download #{url} (encoding: #{encoding})..."
+        print "==> download #{url} (encoding:  #{encoding}/#{force_encoding})..."
 
 
     ## note: assume plain 7-bit ascii for now
     ##  -- assume rsssf uses ISO_8859_15 (updated version of ISO_8859_1)
-    ###-- does NOT use utf-8 character encoding!!!
-    response = Webget.page( url, encoding: encoding )  ## fetch (and cache) html page (via HTTP GET)
+    ## -- does NOT use utf-8 character encoding!!!
+    ##
+    ##    fetch (and cache) html page (via HTTP GET)
+    ##        bom|force|html|http|user|fallback
+     response =  if force_encoding
+                     Webget.page( url, force_encoding: force_encoding )
+                  else
+                     Webget.page( url, encoding: encoding )
+                  end
 
     ## note: exit on get / fetch error - do NOT continue for now - why? why not?
     ## note -    allow 404 not found to pass through

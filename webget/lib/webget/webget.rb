@@ -48,9 +48,11 @@ class Webget   # a web (go get) crawler
   ##   check encoding UTF-8 or utf-8  - makes a difference?
   ##  note - default text encoding "upstream" in webclient for text is UTF-8!!
 
-  def self.page( url, encoding: nil, headers: {} )  ## assumes html format
+  def self.page( url, encoding: nil, force_encoding: nil,
+                      headers: {} )   ## assumes html format
     response = _get( url, headers: headers )
-    response._encoding_user = encoding
+    response._encoding_user  = encoding
+    response._encoding_force = force_encoding
 
     if response.status.ok?  ## must be HTTP 200
       puts "#{response.status.code} #{response.status.message}"

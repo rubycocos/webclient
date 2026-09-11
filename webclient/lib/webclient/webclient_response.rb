@@ -47,9 +47,12 @@ class Webclient
     def _encoding_user=( value ) @_encoding_user = value; end
     def _encoding_user()  defined?( @_encoding_user )  ?  @_encoding_user : nil;  end
 
+    def _encoding_force=( value ) @_encoding_force = value; end
+    def _encoding_force()  defined?( @_encoding_force ) ?  @_encoding_force : nil;  end
+
     ## cache (returned) decoded text - why? why not?
-    def text( encoding: _encoding_user )
-        @text ||= _decode_text( encoding: encoding )
+    def text( encoding: _encoding_user, force_encoding: _encoding_force )
+        @text ||= _decode_text( encoding: encoding, force_encoding: force_encoding )
     end
 
 

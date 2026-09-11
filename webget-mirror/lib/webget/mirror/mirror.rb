@@ -99,9 +99,12 @@ def _mirror_pages( site:,
 
      ## check if not in cache
      ##   note - use force == true  to always (force) download
+     ##
+     ##
 
           html, response_meta = _download_page( url,
-                                                encoding: page_rec.encoding,
+                                                encoding:       page_rec.encoding,
+                                                force_encoding: site.force_page_encoding( page_rec.path ),
                                                 force:    force  )
 
           if response_meta
