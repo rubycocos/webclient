@@ -134,6 +134,15 @@ def _find_links( site:,
                                    next
                                end
 
+                           ###
+                           ## Prepared and maintained by
+                           ##  <A href="http://www.rsssf.org/">Rec.Sport.Soccer...</A>
+                           ##  see rsssf.org/tablesb/braz2023.html
+                           ##
+                           ## change  (normalize) / to /index.html
+                           page_url.path = '/index.html'   if page_url.path = '/'
+
+
         if _broken_path?( page_url.path )
             puts "!! normalized page_url.path expected - got:"
             pp page_url.path
