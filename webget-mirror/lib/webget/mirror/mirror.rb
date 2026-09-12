@@ -84,11 +84,6 @@ def _mirror_pages( site:,
          end
 
 
-         ## note - on download (not if cached)
-         ##        encoding
-         ##           might be get changed
-         ##        ALWAYS use updated encoding!!
-
 
          ##  note - url e.g. https://rsssf.org
          ##         path MUST start with /  e.g.  /curtour.html
@@ -103,7 +98,7 @@ def _mirror_pages( site:,
      ##
 
           html, response_meta = _download_page( url,
-                                                encoding:       page_rec.encoding,
+                                                encoding:       site.page_encoding( page_rec.path ),
                                                 force_encoding: site.force_page_encoding( page_rec.path ),
                                                 force:    force  )
 
@@ -163,9 +158,6 @@ def _mirror_pages( site:,
                internal_rec = MirrorDb::Model::Page.find_or_create_by!(
                                                             path: path ) do |rec|
                                     puts "     add linked page #{rec.path}"
-
-                                    rec.encoding = site.page_encoding( rec.path )
-                                    rec.cached   = false
                                  end
 
                ## puts "  add link from #{page_rec.path} to #{internal_rec.path} to mirror.db"

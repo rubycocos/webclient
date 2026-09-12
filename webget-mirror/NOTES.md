@@ -46,3 +46,18 @@ Last updated: 28 May 1997
   in https://rsssf.org/tableso/oostcup97.html
 
 ```
+
+
+
+old add seed/start pages
+
+
+```
+    ##
+    ##   note - read_csv (CsvReader) returns "" for empty fields and nil for non-existing fields
+    ##           e.g.
+    ##         page1, encoding1   =>    ['page1', 'encoding1']
+    ##         page2,             =>    ['page2', '']
+    ##         page3              =>    ['page3']   -- note: encoding results in nil!!
+
+```

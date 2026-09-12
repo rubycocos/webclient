@@ -190,7 +190,7 @@ class Webclient
                  ##
                  ##  Web browsers inherently treat ISO-8859-1 text as Windows-1252 to avoid breaking these common symbols, and this script mimics that behavior.
 
-                 encoding_html = 'Windows-1252'  if encoding_html.downcase == 'ISO-8859-1'
+                 encoding_html = 'Windows-1252'  if encoding_html.downcase == 'iso-8859-1'
 
 
 
@@ -257,19 +257,7 @@ class Webclient
          ## track/check code range if valid/broken
          @_text_encoding_valid = text.valid_encoding?
       else
-        ## [debug] GET=http://www.football-data.co.uk/mmz4281/0405/SC0.csv
-        ##    Encoding::UndefinedConversionError: "\xA0" from ASCII-8BIT to UTF-8
-        ##     note:  0xA0 (160) is NBSP (non-breaking space) in Windows-1252
-
-       ## note: assume windows encoding (for football-data.uk)
-       ##   use "Windows-1252" for input and convert to utf-8
-       ##
-       ##    see https://www.justinweiss.com/articles/3-steps-to-fix-encoding-problems-in-ruby/
-       ##    see https://en.wikipedia.org/wiki/Windows-1252
-       ## txt = txt.force_encoding( 'Windows-1252' )
-       ## txt = txt.encode( 'UTF-8' )
-       ##   Encoding::UTF_8 => 'UTF-8'
-          puts "  [debug] try converting response.text encoding from >#{encoding}< to >UTF-8<"
+          puts "  [debug] try converting response.text encoding from >#{encoding}< (#{encoding_source}) to >UTF-8<"
           text = text.force_encoding( encoding )
 
           ## track/check code range if valid/broken

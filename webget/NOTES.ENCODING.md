@@ -1,5 +1,29 @@
 # (more) Notes on charset encodings
 
+
+```
+           [debug] GET=http://www.football-data.co.uk/mmz4281/0405/SC0.csv
+               Encoding::UndefinedConversionError: "\xA0" from ASCII-8BIT to UTF-8
+             note:  0xA0 (160) is NBSP (non-breaking space) in Windows-1252
+
+        note: assume windows-1252 !! encoding (for football-data.uk) NOT utf-8!!!
+         use "Windows-1252" for input and convert to utf-8
+
+           see https://www.justinweiss.com/articles/3-steps-to-fix-encoding-problems-in-ruby/
+           see https://en.wikipedia.org/wiki/Windows-1252
+
+        txt = txt.force_encoding( 'Windows-1252' )
+        txt = txt.encode( 'UTF-8' )
+         Encoding::UTF_8 => 'UTF-8'
+
+```
+
+
+
+
+
+
+
 - [ ]  add  normalize/compose after conversion to utf-8 in text
 
 # Imagine one page gives you a decomposed string, and another gives you a composed one

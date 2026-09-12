@@ -1,3 +1,8 @@
+####
+#  to run use:
+#
+#    $ ruby sandbox/test_force_encoding.rb
+
 
 require_relative 'helper'
 
@@ -10,34 +15,28 @@ Webcache.root = './cache'
 ##    [debug] !!! WARN - overwrite response.text encoding; >windows-1252< overridden by >UTF-8< html meta charset
 ##       unicode_normalize/normalize.rb:126:in `gsub': invalid byte sequence in UTF-8 (ArgumentError)
 
-
-
-url = 'https://rsssf.org/tablesa/argchamp.html'
-##
-## res = Webget.page( url, encoding: 'windows-1252', force_encoding: true  )
-res = Webget.page( url, force_encoding: 'windows-1252' )
-
-pp res.status
-pp res.text[0,200]
-
-pp res._text_encoding
-pp res._text_encoding_source
-pp res.text.encoding
-
-
 ## [cache] saving   cache/rsssf.org/tables/2002full.html...
 ##  [debug] !!! WARN - overwrite response.text encoding; >windows-1252< overridden by >UTF-8< html meta charset
 ##     unicode_normalize/normalize.rb:126:in `gsub': invalid byte sequence in UTF-8
 
-url = 'https://rsssf.org/tables/2002full.html'
-res = Webget.page( url, force_encoding: 'windows-1252' )
+urls = [
+ ## 'https://rsssf.org/tablesb/baltic01.html',
+ ## 'https://rsssf.org/tablesa/argchamp.html',
+ ## 'https://rsssf.org/tables/2002full.html',
+  'https://rsssf.org/tableso/ol1964q.html',
+]
 
-pp res.status
-pp res.text[0,200]
+urls.each do |url|
+  res = Webget.page( url, force_encoding: 'windows-1252' )
 
-pp res._text_encoding
-pp res._text_encoding_source
-pp res.text.encoding
+  pp res.status
+  pp res.text[0,200]
+
+  pp res._text_encoding
+  pp res._text_encoding_source
+  pp res.text.encoding
+end
+
 
 
 

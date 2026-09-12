@@ -23,31 +23,22 @@ class Website
 
 
 
-  ## array of hash(table) records e.g.
-  ##    page,         encoding
-  ##    /index.html,  windows-1252
-  def start_pages=( config )
-    @start_pages = config
+  ## array of strings (page paths) e.g.
+  ## e.g.         ['/curdom.html',
+  ##               '/curtour.html',
+  ##               '/histdom.html',
+  ##               '/intclub.html',
+  ##               '/intland.html']
+
+  def start_pages=( pages )
+    @start_pages = pages
   end
   def start_pages
       raise ArgumentError, "required website.start_pages not set"   if @start_pages.nil?
       @start_pages
   end
-
-  def start_pages_path
-      ## collect/build path for all start pages
-      ## e.g.  path: ['/curdom.html',
-      ##               '/curtour.html',
-      ##               '/histdom.html',
-      ##               '/intclub.html',
-      ##               '/intland.html']
-      path = []
-      start_pages.each do |config|
-          path <<  config['page']
-      end
-      path
-  end
-  alias_method :start_path, :start_pages_path
+  alias_method :start_pages_path, :start_pages
+  alias_method :start_path,       :start_pages
 
 
   ###
@@ -138,27 +129,10 @@ class Website
   ### kick-off mirror (pages) operation/run
   def mirror
 
-    ## add seed/start pages
-    ##
-    ##   note - read_csv (CsvReader) returns "" for empty fields and nil for non-existing fields
-    ##           e.g.
-    ##         page1, encoding1   =>    ['page1', 'encoding1']
-    ##         page2,             =>    ['page2', '']
-    ##         page3              =>    ['page3']   -- note: encoding results in nil!!
-
-    start_pages.each do |config|
-      path     = config['page']
-      encoding = config['encoding']
-      encoding = page_encoding( path )   if config['encoding'].nil? || config['encoding'].empty?
-
+    start_path.each do |path|
       page_rec = MirrorDb::Model::Page.find_or_create_by!( path: path ) do |rec|
                       ## note - block only called on create (NOT find!!)
-                      puts "  add page #{rec.path} (cached: false) to mirror.db"
-
-                      ###  fix-fix-fix  - move encoding_user to lookup on demand
-                      ##                     do NOT store in database!!!
-                      rec.encoding = encoding
-                      rec.cached   = false
+                      puts "  add page #{rec.path} (cached: false)"
                 end
       ## pp page_rec
     end
