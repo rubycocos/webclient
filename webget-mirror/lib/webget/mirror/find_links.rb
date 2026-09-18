@@ -140,7 +140,12 @@ def _find_links( site:,
                            ##  see rsssf.org/tablesb/braz2023.html
                            ##
                            ## change  (normalize) / to /index.html
-                           page_url.path = '/index.html'    if page_url.path == '/'
+                           ##
+                           ##  in profiles.html
+                           ##   <A href="http://www.rsssf.org">RSSSF</A>
+
+                           page_url.path = '/index.html'    if page_url.path == '/' ||
+                                                               page_url.path == ''
 
 
         if _broken_path?( page_url.path )
